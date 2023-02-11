@@ -1,0 +1,114 @@
+name: Plan_Nomad
+on:
+  workflow_dispatch:
+    inputs:
+      job_environment:
+        type: choice
+        description: Job environment prod or dev
+        required: true
+        default: prod
+        options:
+          - dev
+          - prod
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - main
+
+env:
+  path_bot: bot_code
+  path_nomad: nomad_code
+  image_name: tgbot
+  repo: ghcr.io
+  job_env: dev
+  ver: 0
+
+jobs:
+  Checkout_repos:
+    runs-on:
+      - self-hosted
+    steps:
+      - name: Debug env vars
+        run: echo $GITHUB_RUN_NUMBER
+      - name: Clean old Docker images
+        run: docker system prune -a -f
+
+      - name: Checkout current repo
+        uses: actions/checkout@v3
+        with:
+          path: ${{env.path_nomad}}
+
+      - name: Moving data for building image
+        run: |
+          rm -rf ${{env.path_path_bot}}/.git &&
+          rm -rf ${{env.path_nomad}}/.git &&
+          mv  ${{env.path_bot}}/*  . &&
+          mv  ${{env.path_nomad}}/* .
+
+  Rendering_nomad_file:
+    runs-on:
+      - self-hosted
+    needs: [Checkout_repos]
+    steps:
+      - name: Debug env vars
+        run: echo $GITHUB_RUN_NUMBER
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        env:
+          https_proxy: '164.92.180.74:3128'
+          http_proxy: '164.92.180.74:3128'
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+        env:
+          TF_VAR_DOCKER_USERNAME: '${{ secrets.DOCKER_USERNAME }}'
+          TF_VAR_DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
+          TF_VAR_IMAGE_NAME: '${{env.image_name}}'
+          TF_VAR_REPO: '${{env.repo}}'
+          TF_VAR_VERSION: '${{ env.ver }}'
+          TF_VAR_JOB_ENV: '${{ env.job_env }}'
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color
+        continue-on-error: true
+        env:
+          TF_VAR_DOCKER_USERNAME: '${{ secrets.DOCKER_USERNAME }}'
+          TF_VAR_DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
+          TF_VAR_IMAGE_NAME: '${{env.image_name}}'
+          TF_VAR_REPO: '${{env.repo}}'
+          TF_VAR_VERSION: '${{ env.ver }}'
+          TF_VAR_JOB_ENV: '${{ env.job_env }}'
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -auto-approve -var VERSION=$GITHUB_RUN_NUMBER
+        continue-on-error: true
+        env:
+          TF_VAR_DOCKER_USERNAME: '${{ secrets.DOCKER_USERNAME }}'
+          TF_VAR_DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
+          TF_VAR_IMAGE_NAME: '${{env.image_name}}'
+          TF_VAR_REPO: '${{env.repo}}'
+          TF_VAR_JOB_ENV: '${{ env.job_env }}'
+          TF_VAR_VERSION: '${{ env.ver }}'
+  Nomad_check:
+    needs: [Rendering_nomad_file]
+    runs-on:
+      - self-hosted
+    steps:
+      - name: Nomad_validate
+        run: nomad job validate bot.nomad
+      - name: Nomad_Plan
+        id: nomad_plan
+        run: |
+          nomad job plan -no-color bot.nomad | tee /dev/stderr | grep 'Job Modify Index:' | awk -F': ' '{ print $2 }'
+      - name: Save_job_index
+        run: |
+          echo "index1=$(nomad job plan -no-color bot.nomad | grep 'Job Modify Index:' | awk -F': ' '{ print $2 }')" >> $GITHUB_ENV
+      - name: Echo_job_index
+        run: echo "${{ env.index1 }}"

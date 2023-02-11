@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "bot-cicd"
+version = "0.1.0"
+description = "cicd"
+authors = ["Roman <mmm.romka@gmail.com>"]
+readme = "README.md"
+packages = [{include = "bot_cicd"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pre-commit = "^2.20.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
