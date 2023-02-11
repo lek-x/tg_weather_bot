@@ -5,6 +5,7 @@ RUN apk update \
     py3-pip \
     gcc \
     musl-dev \
+    libpq-dev \
     postgresql \
     && rm -rf /var/cache/apk/*
 COPY requirements.txt /
