@@ -8,7 +8,7 @@ RUN apk update \
     && rm -rf /var/cache/apk/*
 COPY requirements.txt /
 WORKDIR /app
-COPY ["my_bot.py","entrypoint.sh", "./"]
+COPY ["main.py","entrypoint.sh", "./"]
 RUN chmod +x /app/entrypoint.sh \
     && pip install --upgrade pip setuptools \
     && pip install -r /requirements.txt \
@@ -16,6 +16,6 @@ RUN chmod +x /app/entrypoint.sh \
 ENV bottoken=$bottoken
 ENV weathertok=$weathertok
 EXPOSE 80 88 443 8443
-ENTRYPOINT ["python", "/app/my_bot.py"]
+ENTRYPOINT ["python", "/app/main.py"]
 
 

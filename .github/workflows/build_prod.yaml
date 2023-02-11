@@ -1,5 +1,5 @@
 ---
-name: Build_image_prod
+name: Deploy_prod
 on:
   workflow_dispatch:
     inputs:

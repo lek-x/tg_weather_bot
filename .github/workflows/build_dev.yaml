@@ -1,5 +1,5 @@
 ---
-name: Build_image_dev
+name: Deploy_dev
 on:
   workflow_dispatch:
     inputs:
@@ -22,7 +22,7 @@ on:
 env:
   path_bot: bot_code
   path_nomad: nomad_code
-  image_name: tgbot
+  image_name: tgwbot
   repo: ghcr.io
 
 
