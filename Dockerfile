@@ -5,6 +5,7 @@ RUN apk update \
     py3-pip \
     gcc \
     musl-dev \
+    postgresql \
     && rm -rf /var/cache/apk/*
 COPY requirements.txt /
 WORKDIR /app
@@ -15,6 +16,9 @@ RUN chmod +x /app/entrypoint.sh \
     && pip cache purge
 ENV bottoken=$bottoken
 ENV weathertok=$weathertok
+ENV POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+ENV POSTGRES_USER=$POSTGRES_USER
+ENV POSTGRES_DB=$POSTGRES_DB
 EXPOSE 80 88 443 8443
 ENTRYPOINT ["python", "/app/main.py"]
 
