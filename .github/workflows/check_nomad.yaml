@@ -40,13 +40,6 @@ jobs:
         with:
           path: ${{env.path_nomad}}
 
-      - name: Moving data for building image
-        run: |
-          rm -rf ${{env.path_path_bot}}/.git &&
-          rm -rf ${{env.path_nomad}}/.git &&
-          mv  ${{env.path_bot}}/*  . &&
-          mv  ${{env.path_nomad}}/* .
-
   Rendering_nomad_file:
     runs-on:
       - self-hosted

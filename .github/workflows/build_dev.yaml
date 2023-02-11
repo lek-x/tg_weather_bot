@@ -36,8 +36,6 @@ jobs:
 
       - name: Checkout current repo
         uses: actions/checkout@v3
-        with:
-          path: ${{env.path_nomad}}
 
   Build_docker_image:
     needs: [Checkout_repos]
