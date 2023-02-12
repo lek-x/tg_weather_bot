@@ -33,10 +33,12 @@ jobs:
       - self-hosted
     defaults:
       run:
-        working-directory: ./${{env.path_nomad}}
+        working-directory: ${{env.path_nomad}}
     steps:
       - name: Debug env vars
-        run: echo $GITHUB_RUN_NUMBER
+        run: |
+           echo $GITHUB_RUN_NUMBER
+           echo $working-directory
 
       - name: Clean old Docker images
         run: docker system prune -a -f
@@ -59,7 +61,7 @@ jobs:
       - name: Terraform fmt
         id: fmt
         run: terraform fmt -check
-        working-directory: ./${{env.path_nomad}}
+        working-directory: ${{env.path_nomad}}
 
       - name: Terraform Init
         id: init
@@ -71,7 +73,7 @@ jobs:
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
-        working-directory: ./${{env.path_nomad}}
+        working-directory: ${{env.path_nomad}}
         env:
           TF_VAR_DOCKER_USERNAME: '${{ secrets.DOCKER_USERNAME }}'
           TF_VAR_DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
@@ -84,7 +86,7 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: terraform plan -no-color
-        working-directory: ./${{env.path_nomad}}
+        working-directory: ${{env.path_nomad}}
         env:
           TF_VAR_DOCKER_USERNAME: '${{ secrets.DOCKER_USERNAME }}'
           TF_VAR_DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
@@ -97,7 +99,7 @@ jobs:
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve -var VERSION=$GITHUB_RUN_NUMBER
-        working-directory: ./${{env.path_nomad}}
+        working-directory: ${{env.path_nomad}}
         env:
           TF_VAR_DOCKER_USERNAME: '${{ secrets.DOCKER_USERNAME }}'
           TF_VAR_DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
