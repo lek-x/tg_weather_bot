@@ -25,6 +25,7 @@ env:
   repo: ghcr.io
   job_env: dev
   ver: 0
+  dbport: 5432
 
 jobs:
   Checkout_repos:
@@ -68,6 +69,8 @@ jobs:
           TF_VAR_REPO: '${{env.repo}}'
           TF_VAR_VERSION: '${{ env.ver }}'
           TF_VAR_JOB_ENV: '${{ env.job_env }}'
+          TF_VAR_DB_PORT: ${{env.dbport}}
+
       - name: Terraform Plan
         id: plan
         run: terraform plan -no-color
@@ -79,6 +82,8 @@ jobs:
           TF_VAR_REPO: '${{env.repo}}'
           TF_VAR_VERSION: '${{ env.ver }}'
           TF_VAR_JOB_ENV: '${{ env.job_env }}'
+          TF_VAR_DB_PORT: ${{env.dbport}}
+
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve -var VERSION=$GITHUB_RUN_NUMBER
@@ -90,6 +95,8 @@ jobs:
           TF_VAR_REPO: '${{env.repo}}'
           TF_VAR_JOB_ENV: '${{ env.job_env }}'
           TF_VAR_VERSION: '${{ env.ver }}'
+          TF_VAR_DB_PORT: ${{env.dbport}}
+
   Nomad_check:
     needs: [Rendering_nomad_file]
     runs-on:

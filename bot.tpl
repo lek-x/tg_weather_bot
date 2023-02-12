@@ -80,7 +80,7 @@ job "wtbot-${job_env}" {
             {{ with secret  "secrets/creds/nst-bot"}}
           POSTGRES_PASSWORD = {{.Data.db_pass}}
           POSTGRES_USER = {{.Data.db_user}}
-          POSTGRES_DB = {{.Data.db_name}}
+          POSTGRES_DB = {{.Data.db_name_${job_env}}}
           POSTGRES_PORT = {{.Data.POSTGRES_PORT_${job_env}}}
             {{end}}
           EOF
