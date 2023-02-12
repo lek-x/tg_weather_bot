@@ -59,7 +59,7 @@ job "wtbot-${job_env}" {
         POSTGRES_USER = "$${POSTGRES_USER}"
         POSTGRES_DB = "$${POSTGRES_DB}"
         PGUSER = "$${POSTGRES_USER}"
-        POSTGRES_PORT = "$${{POSTGRES_PORT}"
+        POSTGRES_PORT = "$${POSTGRES_PORT}"
       }
       service {
 	      name = "db"
@@ -120,7 +120,7 @@ job "wtbot-${job_env}" {
         POSTGRES_USER = "$${POSTGRES_USER}"
         POSTGRES_DB = "$${POSTGRES_DB}"
         PGUSER = "$${POSTGRES_USER}"
-        POSTGRES_PORT = "$${{POSTGRES_PORT}"
+        POSTGRES_PORT = "$${POSTGRES_PORT}"
 		  }
 
 	    service {
