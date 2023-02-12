@@ -144,7 +144,7 @@ job "wtbot-${job_env}" {
           weathertok = {{.Data.weathertoken}}
           PPWD = {{.Data.db_pass}}
           POSTGRES_USER = {{.Data.db_user}}
-          PDB = {{.Data.dbname}}
+          PDB = {{.Data.dbname_${job_env}}}
           PGPORT = {{.Data.POSTGRES_PORT_${job_env}}}
             {{end}}
           EOF

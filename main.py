@@ -77,6 +77,7 @@ def create_table():
         if conn is not None:
             conn.close()
 
+
 ### END Initial Block ###
 
 ### Start Functions Block ###
@@ -102,6 +103,7 @@ def addtodb(mci,mfufn,mfuln,mfunn,mi,mct,d,mt):
 
 def enablesending(switch,time,city,user_id):
     """ Function for adding time and status for auto_send into DB"""
+    conn = None
     try:
         conn = psycopg2.connect(params)
         cur = conn.cursor()
@@ -120,6 +122,7 @@ def enablesending(switch,time,city,user_id):
 ### Scheduler block
 def run_scheduled_task():
     """ Function for checking DB and sending message"""
+    conn = None
     try:
         conn = psycopg2.connect(params)
         cur = conn.cursor()
@@ -189,6 +192,7 @@ def status(message):
     """
     function for checking status of auto_send
     """
+    conn = None
     try: 
         conn = psycopg2.connect(params)
         cur = conn.cursor()
