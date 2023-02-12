@@ -39,8 +39,6 @@ jobs:
 
       - name: Checkout current repo
         uses: actions/checkout@v3
-        with:
-          path: ${{env.path_nomad}}
 
   Rendering_nomad_file:
     runs-on:

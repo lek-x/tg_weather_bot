@@ -36,6 +36,9 @@ jobs:
       - name: Clean old Docker images
         run: docker system prune -a -f
 
+      - name: Clean env
+        name: rm -rf *
+
       - name: Checkout current repo
         uses: actions/checkout@v3
 
