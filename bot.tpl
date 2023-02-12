@@ -42,7 +42,7 @@ job "wtbot-${job_env}" {
     task "db-${job_env}" {
       driver = "docker"
       volume_mount {
-        volume      = "postgres"
+        volume      = "postgres-${job_env}"
         destination = "/var/lib/postgresql/data_${job_env}"
         read_only   = false
       }
@@ -55,9 +55,9 @@ job "wtbot-${job_env}" {
         ports = ["db-${job_env}"]
       }
       env {
-        POSTGRES_PASSWORD = "$${PPWD}"
+        POSTGRES_PASSWORD = "$${POSTGRES_PASSWORD}"
         POSTGRES_USER = "$${POSTGRES_USER}"
-        POSTGRES_DB = "$${PDB}"
+        POSTGRES_DB = "$${POSTGRES_DB}"
         PGUSER = "$${POSTGRES_USER}"
         PGPORT = "$${PGPORT}"
       }
@@ -78,9 +78,9 @@ job "wtbot-${job_env}" {
           change_mode = "restart"
           data        = <<EOF
             {{ with secret  "secrets/creds/nst-bot"}}
-          PPWD = {{.Data.db_pass}}
+          POSTGRES_PASSWORD = {{.Data.db_pass}}
           POSTGRES_USER = {{.Data.db_user}}
-          PDB = {{.Data.db_name_${job_env}}}
+          POSTGRES_DB = {{.Data.db_name_${job_env}}}
           PGPORT = {{.Data.POSTGRES_PORT_${job_env}}}
             {{end}}
           EOF
