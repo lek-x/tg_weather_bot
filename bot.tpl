@@ -118,7 +118,7 @@ job "wtbot-${job_env}" {
         weathertok = "$${weathertok}"
         PPWD = "$${PPWD}"
         POSTGRES_USER = "$${POSTGRES_USER}"
-        PDB = "$${POSTGRES_DB}"
+        PDB = "$${PDB}"
         PGUSER = "$${POSTGRES_USER}"
         PGPORT = "$${PGPORT}"
 		  }
@@ -142,7 +142,7 @@ job "wtbot-${job_env}" {
             {{ with secret  "secrets/creds/nst-bot"}}
           bottoken = {{.Data.token_${job_env}}}
           weathertok = {{.Data.weathertoken}}
-          PPPWD = {{.Data.db_pass}}
+          PPWD = {{.Data.db_pass}}
           POSTGRES_USER = {{.Data.db_user}}
           PDB = {{.Data.db_name}}
           PGPORT = {{.Data.POSTGRES_PORT_${job_env}}}

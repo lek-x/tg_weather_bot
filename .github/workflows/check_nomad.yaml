@@ -34,11 +34,17 @@ jobs:
     steps:
       - name: Debug env vars
         run: echo $GITHUB_RUN_NUMBER
+
       - name: Clean old Docker images
         run: docker system prune -a -f
 
+      - name: Clean env
+        run: rm -rf ${{env.path_nomad}}/*
+
       - name: Checkout current repo
         uses: actions/checkout@v3
+        with:
+          path: ${{env.path_nomad}}
 
   Rendering_nomad_file:
     runs-on:
