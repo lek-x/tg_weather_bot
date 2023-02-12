@@ -15,7 +15,7 @@ job "wtbot-${job_env}" {
       port "botapp" {
 	      to = 80
 	    }
-      port "db" {
+      port "db-${job_env}" {
         static = ${dbport}
       }
     }
@@ -39,7 +39,7 @@ job "wtbot-${job_env}" {
         canary = 0
     }
 
-    task "db" {
+    task "db-${job_env}" {
       driver = "docker"
       volume_mount {
         volume      = "postgres"
@@ -55,15 +55,15 @@ job "wtbot-${job_env}" {
         ports = ["db"]
       }
       env {
-        PPWD = "$${PPWD}"
+        POSTGRES_PASSWORD = "$${PPWD}"
         POSTGRES_USER = "$${POSTGRES_USER}"
-        PDB = "$${PDB}"
+        POSTGRES_DB = "$${PDB}"
         PGUSER = "$${POSTGRES_USER}"
         PGPORT = "$${PGPORT}"
       }
       service {
-	      name = "db"
-	      port = "db"
+	      name = "db-${job_env}"
+	      port = "db-${job_env}"
         check {
            name ="alive"
            type     = "tcp"
@@ -118,8 +118,7 @@ job "wtbot-${job_env}" {
         weathertok = "$${weathertok}"
         PPWD = "$${PPWD}"
         POSTGRES_USER = "$${POSTGRES_USER}"
-        PDB = "$${PDB}"
-        PGUSER = "$${POSTGRES_USER}"
+        POSTGRES_DB = "$${PDB}"
         PGPORT = "$${PGPORT}"
 		  }
 
