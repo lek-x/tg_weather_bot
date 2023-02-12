@@ -51,7 +51,7 @@ job "wtbot-${job_env}" {
         max_file_size = 3
       }
       config {
-        image = "postgres:15.1-alpine"
+        image = "postgres:15.2-alpine"
         ports = ["db-${job_env}"]
       }
       env {
