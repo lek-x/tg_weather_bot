@@ -121,7 +121,7 @@ job "wtbot-${job_env}" {
         POSTGRES_USER = "$${POSTGRES_USER}"
         PDB = "$${PDB}"
         PGPORT = "$${PGPORT}"
-        POSTGRES_HOST = "$${NOMAD_IP_db-${job_env}}"
+        POSTGRES_HOST = ""$${NOMAD_IP_db-${job_env}}""
 		  }
 
 	    service {
