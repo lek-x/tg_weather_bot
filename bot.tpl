@@ -55,10 +55,9 @@ job "wtbot-${job_env}" {
         ports = ["db-${job_env}"]
       }
       env {
+        POSTGRES_DB = "$${POSTGRES_DB}"
         POSTGRES_PASSWORD = "$${POSTGRES_PASSWORD}"
         POSTGRES_USER = "$${POSTGRES_USER}"
-        POSTGRES_DB = "$${POSTGRES_DB}"
-        PGUSER = "$${POSTGRES_USER}"
         PGPORT = "$${PGPORT}"
       }
       service {

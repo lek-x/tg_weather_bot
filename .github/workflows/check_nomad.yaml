@@ -31,18 +31,16 @@ jobs:
   Checkout_repos:
     runs-on:
       - self-hosted
-    defaults:
-      run:
-        working-directory: ${{env.path_nomad}}
+
     steps:
       - name: Debug env vars
         run: echo $GITHUB_RUN_NUMBER
 
       - name: Clean old Docker images
-        run: docker system prune -a -f
+        run: docker system prune -af --volume
 
       - name: Clean env
-        run: rm -rf ${{env.path_nomad}}/*
+        run: rm -rf *
 
       - name: Checkout current repo
         uses: actions/checkout@v3
@@ -59,7 +57,6 @@ jobs:
       - name: Terraform fmt
         id: fmt
         run: terraform fmt -check
-        working-directory: ${{env.path_nomad}}
 
       - name: Terraform Init
         id: init
@@ -71,7 +68,6 @@ jobs:
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
-        working-directory: ${{env.path_nomad}}
         env:
           TF_VAR_DOCKER_USERNAME: '${{ secrets.DOCKER_USERNAME }}'
           TF_VAR_DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
@@ -84,7 +80,6 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: terraform plan -no-color
-        working-directory: ${{env.path_nomad}}
         env:
           TF_VAR_DOCKER_USERNAME: '${{ secrets.DOCKER_USERNAME }}'
           TF_VAR_DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
@@ -97,7 +92,6 @@ jobs:
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve -var VERSION=$GITHUB_RUN_NUMBER
-        working-directory: ${{env.path_nomad}}
         env:
           TF_VAR_DOCKER_USERNAME: '${{ secrets.DOCKER_USERNAME }}'
           TF_VAR_DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
