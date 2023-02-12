@@ -73,7 +73,7 @@ job "wtbot-${job_env}" {
 	    }
 
       template {
-          destination = "secrets/db.env"
+          destination = "secrets/db-${job_env}.env"
           env         = true
           change_mode = "restart"
           data        = <<EOF
@@ -135,7 +135,7 @@ job "wtbot-${job_env}" {
 	    }
 
      template {
-          destination = "secrets/app.env"
+          destination = "secrets/app-${job_env}.env"
           env         = true
           change_mode = "restart"
           data        = <<EOF
