@@ -59,16 +59,19 @@ jobs:
       - name: Terraform fmt
         id: fmt
         run: terraform fmt -check
-        continue-on-error: true
+        working-directory: ./${{env.path_nomad}}
+
       - name: Terraform Init
         id: init
         run: terraform init
         env:
           https_proxy: '164.92.180.74:3128'
           http_proxy: '164.92.180.74:3128'
+
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
+        working-directory: ./${{env.path_nomad}}
         env:
           TF_VAR_DOCKER_USERNAME: '${{ secrets.DOCKER_USERNAME }}'
           TF_VAR_DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
@@ -81,7 +84,7 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: terraform plan -no-color
-        continue-on-error: true
+        working-directory: ./${{env.path_nomad}}
         env:
           TF_VAR_DOCKER_USERNAME: '${{ secrets.DOCKER_USERNAME }}'
           TF_VAR_DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
@@ -94,7 +97,7 @@ jobs:
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve -var VERSION=$GITHUB_RUN_NUMBER
-        continue-on-error: true
+        working-directory: ./${{env.path_nomad}}
         env:
           TF_VAR_DOCKER_USERNAME: '${{ secrets.DOCKER_USERNAME }}'
           TF_VAR_DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
