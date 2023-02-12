@@ -46,6 +46,10 @@ job "wtbot-${job_env}" {
         destination = "/var/lib/postgresql/data"
         read_only   = false
       }
+      lifecycle {
+        sidecar = true
+        hook = "prestart"
+      }
       logs {
         max_files     = 2
         max_file_size = 3
