@@ -17,7 +17,7 @@ resource "local_file" "nomad" {
       ver        = var.VERSION
       repo       = var.REPO
       job_env    = var.JOB_ENV
-      dbprot     = var.DB_PORT
+      dbport     = var.DB_PORT
     }
   )
   filename = "./bot.nomad"
