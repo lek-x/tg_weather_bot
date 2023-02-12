@@ -25,6 +25,7 @@ env:
   image_name: tgwbot
   repo: ghcr.io
   dbport: 5433
+  job_environment: dev
 
 
 jobs:
@@ -89,7 +90,7 @@ jobs:
           TF_VAR_IMAGE_NAME: ${{env.image_name}}
           TF_VAR_REPO: ${{env.repo}}
           TF_VAR_VERSION: $GITHUB_RUN_NUMBER
-          TF_VAR_JOB_ENV: '${{ github.event.inputs.job_environment }}'
+          TF_VAR_JOB_ENV: '${{ env.job_environment }}'
           TF_VAR_DB_PORT: ${{env.dbport}}
 
       - name: Terraform Plan
@@ -102,7 +103,7 @@ jobs:
           TF_VAR_IMAGE_NAME: ${{env.image_name}}
           TF_VAR_REPO: ${{env.repo}}
           TF_VAR_VERSION: $GITHUB_RUN_NUMBER
-          TF_VAR_JOB_ENV: '${{ github.event.inputs.job_environment }}'
+          TF_VAR_JOB_ENV: '${{ env.job_environment }}'
           TF_VAR_DB_PORT: ${{env.dbport}}
 
       - name: Terraform Apply
@@ -114,7 +115,7 @@ jobs:
           TF_VAR_DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           TF_VAR_IMAGE_NAME: ${{env.image_name}}
           TF_VAR_REPO: ${{env.repo}}
-          TF_VAR_JOB_ENV: '${{ github.event.inputs.job_environment }}'
+          TF_VAR_JOB_ENV: '${{ env.job_environment }}'
           TF_VAR_VERSION: $GITHUB_RUN_NUMBER
           TF_VAR_DB_PORT: ${{env.dbport}}
 
