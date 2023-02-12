@@ -20,10 +20,10 @@ job "wtbot-${job_env}" {
       }
     }
 
-    volume "postgres" {
+    volume "postgres-${job_env}" {
       type      = "host"
       read_only = false
-      source    = "postgres"
+      source    = "postgres-${job_env}"
     }
     restart {
       attempts = 10
@@ -43,7 +43,7 @@ job "wtbot-${job_env}" {
       driver = "docker"
       volume_mount {
         volume      = "postgres-${job_env}"
-        destination = "/var/lib/postgresql/data_${job_env}"
+        destination = "/var/lib/postgresql/data"
         read_only   = false
       }
       logs {
