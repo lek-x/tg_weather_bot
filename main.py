@@ -16,9 +16,9 @@ from threading import Thread
 import pytz
 
 ### Start Credentials block ###
-dbname=os.environ.get("POSTGRES_DB")
+dbname=os.environ.get("PDB")
 user=os.environ.get("POSTGRES_USER")
-password=os.environ.get("POSTGRES_PASS")
+password=os.environ.get("PPWD")
 host="db" # os.environ.get("POSTGRES_HOST")
 port=os.environ.get("PGPORT")
 print(f'dbname: {dbname}, user: {user}, password: {password}, host: {host}, port: {port}')

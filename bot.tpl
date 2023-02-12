@@ -55,11 +55,11 @@ job "wtbot-${job_env}" {
         ports = ["db"]
       }
       env {
-        POSTGRES_PASSWORD = "$${POSTGRES_PASSWORD}"
+        PPWD = "$${PPWD}"
         POSTGRES_USER = "$${POSTGRES_USER}"
-        POSTGRES_DB = "$${POSTGRES_DB}"
+        PDB = "$${PDB}"
         PGUSER = "$${POSTGRES_USER}"
-        PGPORT = "$${POSTGRES_PORT}"
+        PGPORT = "$${PGPORT}"
       }
       service {
 	      name = "db"
@@ -78,10 +78,10 @@ job "wtbot-${job_env}" {
           change_mode = "restart"
           data        = <<EOF
             {{ with secret  "secrets/creds/nst-bot"}}
-          POSTGRES_PASSWORD = {{.Data.db_pass}}
+          PPWD = {{.Data.db_pass}}
           POSTGRES_USER = {{.Data.db_user}}
-          POSTGRES_DB = {{.Data.db_name_${job_env}}}
-          POSTGRES_PORT = {{.Data.POSTGRES_PORT_${job_env}}}
+          PDB = {{.Data.db_name_${job_env}}}
+          PGPORT = {{.Data.POSTGRES_PORT_${job_env}}}
             {{end}}
           EOF
         }
@@ -116,11 +116,11 @@ job "wtbot-${job_env}" {
 	    env {
         bottoken = "$${bottoken}"
         weathertok = "$${weathertok}"
-        POSTGRES_PASSWORD = "$${POSTGRES_PASSWORD}"
+        PPWD = "$${PPWD}"
         POSTGRES_USER = "$${POSTGRES_USER}"
-        POSTGRES_DB = "$${POSTGRES_DB}"
+        PDB = "$${POSTGRES_DB}"
         PGUSER = "$${POSTGRES_USER}"
-        PGPORT = "$${POSTGRES_PORT}"
+        PGPORT = "$${PGPORT}"
 		  }
 
 	    service {
@@ -142,10 +142,10 @@ job "wtbot-${job_env}" {
             {{ with secret  "secrets/creds/nst-bot"}}
           bottoken = {{.Data.token_${job_env}}}
           weathertok = {{.Data.weathertoken}}
-          POSTGRES_PASSWORD = {{.Data.db_pass}}
+          PPPWD = {{.Data.db_pass}}
           POSTGRES_USER = {{.Data.db_user}}
-          POSTGRES_DB = {{.Data.db_name}}
-          POSTGRES_PORT = {{.Data.POSTGRES_PORT_${job_env}}}
+          PDB = {{.Data.db_name}}
+          PGPORT = {{.Data.POSTGRES_PORT_${job_env}}}
             {{end}}
           EOF
         }
