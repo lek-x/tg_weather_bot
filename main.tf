@@ -4,6 +4,7 @@ variable "IMAGE_NAME" {}
 variable "REPO" {}
 variable "VERSION" {}
 variable "JOB_ENV" {}
+variable "DB_PORT" {}
 
 
 resource "local_file" "nomad" {
@@ -16,6 +17,7 @@ resource "local_file" "nomad" {
       ver        = var.VERSION
       repo       = var.REPO
       job_env    = var.JOB_ENV
+      dbprot     = var.DB_PORT
     }
   )
   filename = "./bot.nomad"

@@ -16,7 +16,7 @@ job "wtbot-${job_env}" {
 	      to = 80
 	    }
       port "db" {
-        static = 5432
+        static = ${dbport}
       }
     }
 
@@ -43,7 +43,7 @@ job "wtbot-${job_env}" {
       driver = "docker"
       volume_mount {
         volume      = "postgres"
-        destination = "/var/lib/postgresql/data"
+        destination = "/var/lib/postgresql/data_${job_env}"
         read_only   = false
       }
       logs {
@@ -59,6 +59,7 @@ job "wtbot-${job_env}" {
         POSTGRES_USER = "$${POSTGRES_USER}"
         POSTGRES_DB = "$${POSTGRES_DB}"
         PGUSER = "$${POSTGRES_USER}"
+        POSTGRES_PORT = "$${{POSTGRES_PORT}"
       }
       service {
 	      name = "db"
@@ -80,6 +81,7 @@ job "wtbot-${job_env}" {
           POSTGRES_PASSWORD = {{.Data.db_pass}}
           POSTGRES_USER = {{.Data.db_user}}
           POSTGRES_DB = {{.Data.db_name}}
+          POSTGRES_PORT = {{.Data.POSTGRES_PORT_${job_env}}}
             {{end}}
           EOF
         }
@@ -118,6 +120,7 @@ job "wtbot-${job_env}" {
         POSTGRES_USER = "$${POSTGRES_USER}"
         POSTGRES_DB = "$${POSTGRES_DB}"
         PGUSER = "$${POSTGRES_USER}"
+        POSTGRES_PORT = "$${{POSTGRES_PORT}"
 		  }
 
 	    service {
@@ -142,6 +145,7 @@ job "wtbot-${job_env}" {
           POSTGRES_PASSWORD = {{.Data.db_pass}}
           POSTGRES_USER = {{.Data.db_user}}
           POSTGRES_DB = {{.Data.db_name}}
+          POSTGRES_PORT = {{.Data.POSTGRES_PORT_${job_env}}}
             {{end}}
           EOF
         }

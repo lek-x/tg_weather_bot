@@ -21,6 +21,7 @@ env:
   path_nomad: nomad_code
   image_name: tgbot
   repo: ghcr.io
+  dbport: 5432
 
 
 jobs:
@@ -86,6 +87,7 @@ jobs:
           TF_VAR_REPO: ${{env.repo}}
           TF_VAR_VERSION: $GITHUB_RUN_NUMBER
           TF_VAR_JOB_ENV: '${{ github.event.inputs.job_environment }}'
+          TF_VAR_DB_PORT: ${{env.dbport}}
 
       - name: Terraform Plan
         id: plan
@@ -98,6 +100,7 @@ jobs:
           TF_VAR_REPO: ${{env.repo}}
           TF_VAR_VERSION: $GITHUB_RUN_NUMBER
           TF_VAR_JOB_ENV: '${{ github.event.inputs.job_environment }}'
+          TF_VAR_DB_PORT: ${{env.dbport}}
 
       - name: Terraform Apply
         id: apply
@@ -110,6 +113,7 @@ jobs:
           TF_VAR_REPO: ${{env.repo}}
           TF_VAR_JOB_ENV: '${{ github.event.inputs.job_environment }}'
           TF_VAR_VERSION: $GITHUB_RUN_NUMBER
+          TF_VAR_DB_PORT: ${{env.dbport}}
 
   Run_nomad:
     needs: [Render_template]
