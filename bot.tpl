@@ -52,7 +52,7 @@ job "wtbot-${job_env}" {
       }
       config {
         image = "postgres:15.1-alpine"
-        ports = ["db"]
+        ports = ["db-${job_env}"]
       }
       env {
         POSTGRES_PASSWORD = "$${PPWD}"
@@ -117,8 +117,9 @@ job "wtbot-${job_env}" {
         bottoken = "$${bottoken}"
         weathertok = "$${weathertok}"
         PPWD = "$${PPWD}"
+        POSTGRES_PASSWORD = "$${PPWD}"
         POSTGRES_USER = "$${POSTGRES_USER}"
-        POSTGRES_DB = "$${PDB}"
+        PDB = "$${PDB}"
         PGPORT = "$${PGPORT}"
 		  }
 
