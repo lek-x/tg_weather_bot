@@ -114,6 +114,7 @@ def enablesending(switch,time,city,user_id):
         print(error)
     finally:
         if conn is not None:
+            print(f'dbname: {dbname}, user: {user}, password: {password}, host: {host}, port: {port}')
             conn.close()
 
 ### Scheduler block

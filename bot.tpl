@@ -80,7 +80,7 @@ job "wtbot-${job_env}" {
             {{ with secret  "secrets/creds/nst-bot"}}
           POSTGRES_PASSWORD = {{.Data.db_pass}}
           POSTGRES_USER = {{.Data.db_user}}
-          POSTGRES_DB = {{.Data.db_name_${job_env}}}
+          POSTGRES_DB = {{.Data.dbname_${job_env}}}
           PGPORT = {{.Data.POSTGRES_PORT_${job_env}}}
             {{end}}
           EOF
@@ -145,7 +145,7 @@ job "wtbot-${job_env}" {
           weathertok = {{.Data.weathertoken}}
           PPWD = {{.Data.db_pass}}
           POSTGRES_USER = {{.Data.db_user}}
-          PDB = {{.Data.db_name}}
+          PDB = {{.Data.dbname}}
           PGPORT = {{.Data.POSTGRES_PORT_${job_env}}}
             {{end}}
           EOF
