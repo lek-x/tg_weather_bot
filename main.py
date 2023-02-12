@@ -16,13 +16,13 @@ from threading import Thread
 import pytz
 
 ### Start Credentials block ###
-dbname=os.environ.get("PDB")
+pdbn=os.environ.get("PDB")
 user=os.environ.get("POSTGRES_USER")
 password=os.environ.get("PPWD")
 host=os.environ.get("POSTGRES_HOST")
 port=os.environ.get("PGPORT")
-print(f'dbname: {dbname}, user: {user}, password: {password}, host: {host}, port: {port}')
-params = "dbname="+ dbname + " host=" + host + " user=" + user + " password=" + password + " port=" + port
+print(f'dbname: {pdbn}, user: {user}, password: {password}, host: {host}, port: {port}')
+params = "dbname="+ pdbn + " host=" + host + " user=" + user + " password=" + password + " port=" + port
 token=os.environ.get('bottoken')
 bot = telebot.TeleBot(token)
 
