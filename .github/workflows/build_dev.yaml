@@ -37,7 +37,7 @@ jobs:
         run: docker system prune -a -f
 
       - name: Clean env
-        name: rm -rf *
+        run: rm -rf *
 
       - name: Checkout current repo
         uses: actions/checkout@v3
