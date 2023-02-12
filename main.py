@@ -21,6 +21,7 @@ user=os.environ.get("POSTGRES_USER")
 password=os.environ.get("POSTGRES_PASS")
 host="db" # os.environ.get("POSTGRES_HOST")
 port=os.environ.get("PGPORT")
+print(f'dbname: {dbname}, user: {user}, password: {password}, host: {host}, port: {port}')
 params = "dbname="+ dbname + " host=" + host + " user=" + user + " password=" + password + " port=" + port
 token=os.environ.get('bottoken')
 bot = telebot.TeleBot(token)

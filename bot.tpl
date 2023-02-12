@@ -10,7 +10,7 @@ job "wtbot-${job_env}" {
     change_mode   = "signal"
     change_signal = "SIGUSR1"
   }
-  group "botgr" {
+  group "botgr-${job_env}" {
     network {
       port "botapp" {
 	      to = 80
