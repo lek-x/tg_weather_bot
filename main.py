@@ -21,7 +21,6 @@ user=os.environ.get("POSTGRES_USER")
 password=os.environ.get("PPWD")
 host=os.environ.get("POSTGRES_HOST")
 port=os.environ.get("PGPORT")
-print(f'dbname: {pdbn}, user: {user}, password: {password}, host: {host}, port: {port}')
 params = "dbname="+ pdbn + " host=" + host + " user=" + user + " password=" + password + " port=" + port
 token=os.environ.get('bottoken')
 bot = telebot.TeleBot(token)
@@ -110,12 +109,10 @@ def enablesending(switch,time,city,user_id):
                         on conflict (user_id) 
                         DO update set send_time=excluded.send_time, city=excluded.city, send_message_enabled=excluded.send_message_enabled""".format({switch},{time},{city},{user_id}))
         conn.commit()
-        conn.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
         if conn is not None:
-            print(f'dbname: {dbname}, user: {user}, password: {password}, host: {host}, port: {port}')
             conn.close()
 
 ### Scheduler block
@@ -128,7 +125,6 @@ def run_scheduled_task():
         cur.execute(f"""select * from auto_send 
                         join users on (auto_send.user_id = users.user_id )""")
         status_data=cur.fetchall()
-        conn.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
@@ -137,9 +133,6 @@ def run_scheduled_task():
     timeInzone = datetime.now(timezone)
     currentTime = timeInzone.strftime("%H:%M")
     for row in status_data:
-        print(row[1])
-        print(row[4])
-        print(row[3].strftime("%H:%M"))
         if row[1] == False:
             continue
         elif row[1] == True and row[3].strftime("%H:%M")==currentTime:
@@ -207,9 +200,7 @@ def status(message):
     usr_id=user_status[2]
     set_time=user_status[3].strftime("%H:%M")
     set_city=user_status[4]
-    print(type(message))
-    for row in user_status:
-        print(row)
+ 
     bot.send_message(message.chat.id, f'Auto send status:\nStatus:{send_enabled},\ntime: {set_time},\ncity: {set_city} \nchat_id: {usr_id}')
 
 
