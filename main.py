@@ -159,6 +159,7 @@ def run_scheduled_task():
             message.from_user=from_user(row[6],row[7],row[8])
 
             get_weather(message)
+            scheduler.shutdown(wait=False)
 
 scheduler = BlockingScheduler(timezone="Europe/Istanbul") # You need to add a timezone, otherwise it will give you a warning
 scheduler.add_job(run_scheduled_task, 'interval', seconds=dbcheck_interval) # Runs every 50 seconds
@@ -348,4 +349,5 @@ def get_weather(message):
 create_table()
 
 Thread(target=schedule_checker).start()
-bot.polling(non_stop=True, interval=0)
+#bot.polling(non_stop=True, interval=0)
+bot.infinity_polling()
