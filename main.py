@@ -427,9 +427,9 @@ def get_weather(message):
             hour_weath_e = "\U0001f50d\ufe0f"
         addtodb(
             message.chat.id,
-            message.from_user.first_name,
-            message.from_user.last_name,
-            message.from_user.username,
+            message.FromUser.first_name,
+            message.FromUser.last_name,
+            message.FromUser.username,
             message.id,
             message.chat.type,
             date,
