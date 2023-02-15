@@ -192,7 +192,7 @@ def run_scheduled_task():
                     self.id = chatid
                     self.type = chtype
 
-            class FromUser(message):
+            class from_user(message):
                 """Subclass for message"""
 
                 def __init__(self, frname, lstname, usrname):
@@ -204,7 +204,7 @@ def run_scheduled_task():
                 row[4], row[0], time.mktime(datetime.now(timezone).timetuple())
             )
             message.chat = Chat(row[2], "Private")
-            message.from_user = FromUser(row[6], row[7], row[8])
+            message.from_user = from_user(row[6], row[7], row[8])
 
             get_weather(message)
             scheduler.shutdown(wait=False)
@@ -372,15 +372,7 @@ def get_weather(message):
 
         ### Retrieving weather information from API according retrieved city info
         url_string = (
-            "https://api.open-meteo.com/v1/forecast?latitude="
-            + str(latitude)
-            + "&longitude="
-            + str(longitude)
-            + "&hourly=temperature_2m,apparent_temperature,weathercode,\
-            surface_pressure,relativehumidity_2m&daily=weathercode,temperature_2m_max,\
-            temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,\
-            sunset,windspeed_10m_max&current_weather=true&timezone="
-            + timezone
+            "https://api.open-meteo.com/v1/forecast?latitude=" + str(latitude) + "&longitude=" + str(longitude)+ "&hourly=temperature_2m,apparent_temperature,weathercode,surface_pressure,relativehumidity_2m&daily=weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,windspeed_10m_max&current_weather=true&timezone=" + timezone
         )
         req = requests.get(url_string)
         data = req.json()
@@ -427,9 +419,9 @@ def get_weather(message):
             hour_weath_e = "\U0001f50d\ufe0f"
         addtodb(
             message.chat.id,
-            message.FromUser.first_name,
-            message.FromUser.last_name,
-            message.FromUser.username,
+            message.from_user.first_name,
+            message.from_user.last_name,
+            message.from_user.username,
             message.id,
             message.chat.type,
             date,
