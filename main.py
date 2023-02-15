@@ -161,33 +161,33 @@ def run_scheduled_task():
     timeInzone = datetime.now(timezone)
     currentTime = timeInzone.strftime("%H:%M")
     for row in status_data:
-        if row[1] == False:
+        if row[1] is False:
             continue
-        elif row[1] == True and row[3].strftime("%H:%M") == currentTime:
+        if row[1] is True and row[3].strftime("%H:%M") == currentTime:
 
-            class message:
+            class Message:
                 def __init__(self, city, idm, mdate):
                     # Class Variable
                     self.text = city
                     self.id = idm
                     self.date = mdate
 
-            class chat(message):
+            class Chat(message):
                 def __init__(self, chatid, chtype):
                     self.id = chatid
                     self.type = chtype
 
-            class from_user(message):
+            class From_user(message):
                 def __init__(self, frname, lstname, usrname):
                     self.first_name = frname
                     self.last_name = lstname
                     self.username = usrname
 
-            message = message(
+            message = Message(
                 row[4], row[0], time.mktime(datetime.now(timezone).timetuple())
             )
-            message.chat = chat(row[2], "Private")
-            message.from_user = from_user(row[6], row[7], row[8])
+            message.chat = Chat(row[2], "Private")
+            message.from_user = From_user(row[6], row[7], row[8])
 
             get_weather(message)
             scheduler.shutdown(wait=False)
@@ -270,7 +270,7 @@ def auto_send(message):
 def get_switch(message):
     message_str = message.text
     check_string = re.search("yes|no|Yes|No", message_str)
-    if check_string != None:
+    if check_string is not None:
         switch_status = message_str[0:3]
         switch_status = switch_status.lower()
         switch_status = re.findall("no|yes", switch_status)
