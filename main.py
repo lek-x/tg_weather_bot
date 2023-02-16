@@ -176,7 +176,7 @@ def run_scheduled_task():
             continue
         if row[1] is True and row[3].strftime("%H:%M") == current_time:
 
-            class Message:
+            class message:
                 """Class for generating message object"""
 
                 def __init__(self, city, idm, mdate):
@@ -185,7 +185,7 @@ def run_scheduled_task():
                     self.id = idm
                     self.date = mdate
 
-            class Chat(message):
+            class chat(message):
                 """Subclass for message"""
 
                 def __init__(self, chatid, chtype):
@@ -200,10 +200,10 @@ def run_scheduled_task():
                     self.last_name = lstname
                     self.username = usrname
 
-            message = Message(
+            message = message(
                 row[4], row[0], time.mktime(datetime.now(timezone).timetuple())
             )
-            message.chat = Chat(row[2], "Private")
+            message.chat = chat(row[2], "Private")
             message.from_user = from_user(row[6], row[7], row[8])
 
             get_weather(message)
