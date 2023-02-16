@@ -207,7 +207,6 @@ def run_scheduled_task():
             message.from_user = from_user(row[6], row[7], row[8])
 
             get_weather(message)
-            scheduler.shutdown(wait=False)
 
 
 scheduler = BlockingScheduler(
