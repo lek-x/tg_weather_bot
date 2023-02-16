@@ -262,7 +262,7 @@ def status(message):
     finally:
         if conn is not None:
             conn.close()
-    send_enabled = "Enabled" if user_status[1] == "True" else "Disabled"
+    send_enabled = "Enabled" if user_status[1] == True else "Disabled"
     usr_id = user_status[2]
     set_time = user_status[3].strftime("%H:%M")
     set_city = user_status[4]
@@ -281,8 +281,7 @@ def auto_send(message):
     """
     bot.send_message(
         message.chat.id,
-        "Please send text in format for auto notification. \nFor enabling:\
-        'yes 08:00 Paris' \nFor disabling:  'no' ",
+        "Please send text in format for auto notification. \nFor enabling: 'yes 08:00 Paris' \nFor disabling: 'no' ",
     )
 
     bot.register_next_step_handler(message, get_switch)
@@ -372,7 +371,12 @@ def get_weather(message):
 
         ### Retrieving weather information from API according retrieved city info
         url_string = (
-            "https://api.open-meteo.com/v1/forecast?latitude=" + str(latitude) + "&longitude=" + str(longitude)+ "&hourly=temperature_2m,apparent_temperature,weathercode,surface_pressure,relativehumidity_2m&daily=weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,windspeed_10m_max&current_weather=true&timezone=" + timezone
+            "https://api.open-meteo.com/v1/forecast?latitude="
+            + str(latitude)
+            + "&longitude="
+            + str(longitude)
+            + "&hourly=temperature_2m,apparent_temperature,weathercode,surface_pressure,relativehumidity_2m&daily=weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,windspeed_10m_max&current_weather=true&timezone="
+            + timezone
         )
         req = requests.get(url_string)
         data = req.json()
