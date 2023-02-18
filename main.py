@@ -78,6 +78,20 @@ emoji = {
 logger = telebot.logger
 telebot.logger.setLevel(logging.INFO)
 
+
+conn = psycopg2.connect(params)
+cur = conn.cursor()
+
+while True:
+    try:
+        cur.execute('SELECT * FROM information_schema.tables limit 1')
+        testcont=cur.fetchone()
+        if testcont[1] == 'pg_catalog':
+            break
+    except Exception as er:
+        print(er)
+
+    
 ### Start Initial Block ###
 def create_table():
     """Creating 3 tables if they are not exist"""
@@ -106,13 +120,13 @@ def create_table():
         cur = conn.cursor()
         for command in commands:
             cur.execute(command)
-            conn.commit()
 
     except (Exception, psycopg2.DatabaseError) as error:
         print(error, error.pgerror, error.diag.message_detail)
 
     finally:
         if conn is not None:
+            conn.commit()
             conn.close()
 
 create_table()

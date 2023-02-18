@@ -9,12 +9,13 @@ on:
         required: true
         default: 'prod'
         options:
-          - dev
           - prod
 
   pull_request:
     branches:
       - main
+    types:
+      - closed
 
 env:
   path_bot: bot_code
