@@ -115,6 +115,7 @@ def create_table():
         if conn is not None:
             conn.close()
 
+create_table()
 
 ### END Initial Block ###
 
@@ -442,7 +443,7 @@ def get_weather(message):
             bot.send_message(message.chat.id, "I can't find this city. Try again.")
 
 
-create_table()
+
 
 Thread(target=schedule_checker).start()
 # bot.polling(non_stop=True, interval=0)
