@@ -81,14 +81,15 @@ telebot.logger.setLevel(logging.INFO)
 
 conn = psycopg2.connect(params)
 cur = conn.cursor()
-testcont=''
-while testcont[1] != 'public':
+
+while True:
     try:
         cur.execute('SELECT * FROM information_schema.tables limit 1')
         testcont=cur.fetchone()
+        if testcont[1] == 'pg_catalog':
+            break
     except Exception as er:
         print(er)
-
 
     
 ### Start Initial Block ###
