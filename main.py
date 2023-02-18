@@ -82,7 +82,7 @@ telebot.logger.setLevel(logging.INFO)
 conn = psycopg2.connect(params)
 cur = conn.cursor()
 testcont=''
-while testcont != 'public':
+while testcont[1] != 'public':
     try:
         cur.execute('SELECT * FROM information_schema.tables limit 1')
         testcont=cur.fetchone()
