@@ -41,6 +41,37 @@ bot = telebot.TeleBot(token)
 timezone = pytz.timezone("Europe/Istanbul")
 DBCHECK_INTERVAL = 50
 
+emoji = {
+    "0": "Clear \u2600\ufe0f",
+    "1": "Mainly clear \U0001f324\ufe0f",
+    "2": "Partly cloudy \u26c5\ufe0f",
+    "3": "overcast \u2601\ufe0f",
+    "45": "Fog \U0001f32b",
+    "48": "Depositing rime fog \U0001f32b",
+    "51": "Drizzle: Light \U0001f327\ufe0f",
+    "52": "Drizzle: moderate \U0001f327\ufe0f",
+    "53": "Drizzle: dense intensity \U0001f327\ufe0f",
+    "56": "Freezing Drizzle: Light \U0001f327\ufe0f",
+    "57": "Freezing Drizzle: dense intensity \U0001f327\ufe0f",
+    "61": "Rain: Slight \U0001f327\ufe0f",
+    "63": "Rain: moderate \U0001f327\ufe0f",
+    "65": "Rain: heavy intensity \U0001f327\ufe0f",
+    "66": "Freezing Rain: Light \U0001f327\ufe0f",
+    "67": "Freezing Rain: heavy intensity \U0001f327\ufe0f",
+    "71": "Snow fall: Slight \U0001f328\ufe0f",
+    "73": "Snow fall: moderate \U0001f328\ufe0f",
+    "75": "Snow fall: heavy intensity \U0001f328\ufe0f",
+    "77": "Snow grains \U0001f328\ufe0f",
+    "80": "Rain showers: Sligh \U0001f327\ufe0f",
+    "81": "Rain showers: moderate \U0001f327\ufe0f",
+    "82": "Rain showers: violent \U0001f327\ufe0f",
+    "85": "Snow showers slight \U0001f328\ufe0f",
+    "86": "Snow showers heavy \U0001f328\ufe0f",
+    "95": "Thunderstorm \U0001f300\ufe0f",
+    "96": "Thunderstorm with slight and heavy hail \U0001f300\ufe0f",
+    "99": "Thunderstorm with slight and heavy hail \U0001f300\ufe0f",
+}
+
 
 ### End Credentials block ###
 
@@ -321,54 +352,14 @@ def get_weather(message):
     """
     func for get weather and sending it to user
     """
-    if message.text == "help":
-        bot.reply_to(
-            message,
-            """/status - show details about planned notification\n/auto - activate auto notification configuration dialogue\n""",
-        )
+    if re.match("help|Help",str(message.text)):
+        bot.reply_to(message,"/status - show details about planned notification\n/auto - activate auto notification configuration dialogue\n")
 
-    if re.search(
-        "Glory to Ukraine|Slava Ukraine|glory to ukraine|slava ukraine|Слава Украине|слава украине",
-        str(message.text),
-    ):
-        bot.reply_to(
-            message,
-            "Героям Слава!\U0001f1fa\U0001f1e6\nGlory to the Heroes!\U0001f1fa\U0001f1e6",
-        )
+    elif re.match("Glory to Ukraine|Slava Ukraine|glory to ukraine|slava ukraine|Слава Украине|слава украине",str(message.text)):
+        bot.reply_to(message,"Героям Слава!\U0001f1fa\U0001f1e6\nGlory to the Heroes!\U0001f1fa\U0001f1e6")
 
     else:
-
         ### Emoji block for weather status
-        emoji = {
-            "0": "Clear \u2600\ufe0f",
-            "1": "Mainly clear \U0001f324\ufe0f",
-            "2": "Partly cloudy \u26c5\ufe0f",
-            "3": "overcast \u2601\ufe0f",
-            "45": "Fog \U0001f32b",
-            "48": "Depositing rime fog \U0001f32b",
-            "51": "Drizzle: Light \U0001f327\ufe0f",
-            "52": "Drizzle: moderate \U0001f327\ufe0f",
-            "53": "Drizzle: dense intensity \U0001f327\ufe0f",
-            "56": "Freezing Drizzle: Light \U0001f327\ufe0f",
-            "57": "Freezing Drizzle: dense intensity \U0001f327\ufe0f",
-            "61": "Rain: Slight \U0001f327\ufe0f",
-            "63": "Rain: moderate \U0001f327\ufe0f",
-            "65": "Rain: heavy intensity \U0001f327\ufe0f",
-            "66": "Freezing Rain: Light \U0001f327\ufe0f",
-            "67": "Freezing Rain: heavy intensity \U0001f327\ufe0f",
-            "71": "Snow fall: Slight \U0001f328\ufe0f",
-            "73": "Snow fall: moderate \U0001f328\ufe0f",
-            "75": "Snow fall: heavy intensity \U0001f328\ufe0f",
-            "77": "Snow grains \U0001f328\ufe0f",
-            "80": "Rain showers: Sligh \U0001f327\ufe0f",
-            "81": "Rain showers: moderate \U0001f327\ufe0f",
-            "82": "Rain showers: violent \U0001f327\ufe0f",
-            "85": "Snow showers slight \U0001f328\ufe0f",
-            "86": "Snow showers heavy \U0001f328\ufe0f",
-            "95": "Thunderstorm \U0001f300\ufe0f",
-            "96": "Thunderstorm with slight and heavy hail \U0001f300\ufe0f",
-            "99": "Thunderstorm with slight and heavy hail \U0001f300\ufe0f",
-        }
         try:
             ### Retrieving city information from API according user text
             req_city = requests.get(
@@ -401,7 +392,6 @@ def get_weather(message):
             cur_weather = str(data["current_weather"]["temperature"])
             cur_wind = data["current_weather"]["windspeed"]
             cur_weather_emoji = str(data["current_weather"]["weathercode"])
-
             cur_weath_e = emoji.get(str(cur_weather_emoji), "\U0001f50d\ufe0f")
 
             # daily
@@ -413,7 +403,6 @@ def get_weather(message):
             sunrise = (str(data["daily"]["sunrise"][0]))[-5:]
             sunset = (str(data["daily"]["sunset"][0]))[-5:]
             day_windspeed_max = data["daily"]["windspeed_10m_max"][0]
-
             day_weath_e = emoji.get(str(day_weather_code), "\U0001f50d\ufe0f")
 
             # hourly wetaher
@@ -449,7 +438,6 @@ def get_weather(message):
                 f"Hourly weather: {hourly_time}\nTemperature: {hourly_weather} C° {hour_weath_e}\nFeels like: {hourly_feels_like} C°\nPressure: {hourly_pressure} mm/Hg\n"
                 f"Humidity: {hourly_humidity} %",
             )
-
         except Exception:
             bot.send_message(message.chat.id, "I can't find this city. Try again.")
 
