@@ -81,13 +81,15 @@ telebot.logger.setLevel(logging.INFO)
 
 conn = psycopg2.connect(params)
 cur = conn.cursor()
-n=0
-while True:
-    cursor.execute('SELECT * FROM information_schema.tables limit 1')
-    n=+1
+testcont=''
+while testcont != 'public':
+    try:
+        cur.execute('SELECT * FROM information_schema.tables limit 1')
+        testcont=cur.fetchone()
+    except Exception as er:
+        print(er)
 
-    if n == 15: 
-        break
+
     
 ### Start Initial Block ###
 def create_table():
