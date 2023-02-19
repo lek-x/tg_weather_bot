@@ -76,7 +76,7 @@ emoji = {
 ### End Credentials block ###
 
 logger = telebot.logger
-telebot.logger.setLevel(logging.INFO)
+telebot.logger.setLevel(logging.DEBUG)
 
 
 conn = psycopg2.connect(params)
@@ -86,7 +86,7 @@ while True:
     try:
         cur.execute('SELECT * FROM information_schema.tables limit 1')
         testcont=cur.fetchone()
-        if testcont[1] == 'pg_catalog':
+        if testcont[1] == 'pg_catalog' or testcont[1] == 'public':
             break
     except Exception as er:
         print(er)
