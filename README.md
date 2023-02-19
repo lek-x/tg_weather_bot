@@ -23,6 +23,9 @@ It is a python based app Telegram bot
   - HashiCorp Vault
   - HashiCorp Nomad
   - Github runner
+  - poetry
+  - Python > 3.7
+  - pip
 
 
 ```mermaid
@@ -53,38 +56,41 @@ graph TD
 ```
 
 ```mermaid
-flowchart TD;
-  
+---
+title: CI/CD Environments Logic
+---
+flowchart LR;
+ A[Git push to DEV] --> B[Auto Deploy to Dev]
+ C[DEV PR merged into main] --> D[Auto start PROD deploying]
+```
+
+```mermaid
+---
+title: Pipeline steps
+---
+flowchart LR;
+A[Clean curent directory + \ndocker system prune] --> B[Checkout] --> C[Building Docker Image\n and push to registry] --> D[Check image\nby Anchore Grype] --> E[Rendering Terraform template\n for Nomad] -->F[Nomad job run]
 
 ```
 
 
-
-
-## Directory structure:
-1. k8s/ - contains manifests to deploy App and other services
-2. Static/ - files for web page
-3. templates/ - html templates for rendering web pages
-
 ## Main files:
 1. Dockerfile - to build app
-2. hello.py - app core
-3. init_db.py - scirpt for migrating DB
-4. Jenkinsfile.app - pipeline code for deploy app
+2. main.py - app core
+3. .github/ - CI/CD workflow
+4. bot.tpl - terraform template
+5. entrypoint.sh - entrypoint for container
+6. main.tf - terraform main file
+7. .pre-commit-config.yml - config for pre-commit tool
+8. requiremenets.txt - python packages for app
 
 ## Quick start:
-1. Deploy k8s cluster
-2. Clone this repo
-3. Customize your settings
-4. Set context to current cluster
-5. Go to k8s directory and run
-    ```
-    one_step_run.sh
-    ```
-6. Wait some time
-7. Use http address which shows in terminal to access to App
+TBD
 
 
+## Known bugs and limitations
+1. Nomad can't understand when app container has been deployed succefully, CI/CD always shows last step as failed 
+2. Hourly weather may show wrong hour.
 
 
 ## License
