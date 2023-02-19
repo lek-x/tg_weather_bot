@@ -76,7 +76,7 @@ emoji = {
 ### End Credentials block ###
 
 logger = telebot.logger
-telebot.logger.setLevel(logging.DEBUG)
+telebot.logger.setLevel(logging.INFO)
 
 
 conn = psycopg2.connect(params)
