@@ -10,10 +10,6 @@ on:
         options:
           - dev
           - prod
-  push:
-    branches:
-      - dev
-
   pull_request:
     branches:
       - main
