@@ -135,6 +135,8 @@ job "wtbot-${job_env}" {
            type     = "script"
            command = "/bin/bash"
            args  = ["-c","test -f /app/main.py" ]
+           interval = "20s"
+           timeout = "7s"
         }
 	    }
 
