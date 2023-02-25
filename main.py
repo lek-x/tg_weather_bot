@@ -282,7 +282,7 @@ def start(message):
     """
     bot.send_message(
         message.chat.id,
-        "Hello! \nI can show you the weather today in any city and send planned notification.\nPlease send me the name of the city.\nSend 'help' for showing commands",
+        "Hello! \nI can show you the weather today in any city and send planned notification.\nPlease send me the name of the city.\nBefore configuring autosend function send my any city name to remember you\nSend 'help' for showing commands",
     )
 
 
