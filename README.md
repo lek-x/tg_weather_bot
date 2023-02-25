@@ -1,7 +1,12 @@
-# Telegram Weather bot with CI/CD deploying pipline. 
+# Telegram Weather bot with CI/CD deploying pipline.
 
 ## Description:
 This repo contains Python code of telegram bot and CI/CD code for deployig in dev/prod environments:
+
+## Bot telegram id [PROD version]
+
+https://t.me/weather_rms_bot
+
 
 ## About App:
 It is a python based app Telegram bot
@@ -15,11 +20,11 @@ It is a python based app Telegram bot
 
 
 
-## Requrements: 
+## Requrements:
   - Linux based OS
   - Terraform >= 1.0
   - Docker
-  - Anchore Grype tool 
+  - Anchore Grype tool
   - HashiCorp Vault
   - HashiCorp Nomad
   - Github runner
@@ -39,12 +44,13 @@ graph TD
   end
   subgraph C[Linux VM]
     direction TB
-    subgraph D[NOMAD]
+    subgraph D[NOMAD Cluster]
         E[PostgreSQL 15]
         F[Weather Bot]
-        F <--> E
+        F <-.Storing data.-> E
     end
-    D -- Get secrets --> G 
+    F -- Get secrets and vars --> G
+    E -- Get secrets and vars-->G
     D -- Get images-->A
     subgraph G[Vault]
         H[Secret1]
@@ -60,13 +66,14 @@ graph TD
 title: CI/CD Environments Logic
 ---
 flowchart LR;
- A[Git push to DEV] --> B[Auto Deploy to Dev]
- C[DEV PR merged into main] --> D[Auto start PROD deploying]
+ A[On push to DEV] --> B[Auto Deploy to Dev]
+ C[On PR merged into main] --> E[Nomad Plan]-->D[Auto start PROD deploying]
 ```
+
 
 ```mermaid
 ---
-title: Pipeline steps
+title: DEV/PROD Pipeline steps
 ---
 flowchart LR;
 A[Clean curent directory + \ndocker system prune] --> B[Checkout] --> C[Building Docker Image\n and push to registry] --> D[Check image\nby Anchore Grype] --> E[Rendering Terraform template\n for Nomad] -->F[Nomad job run]
@@ -89,8 +96,8 @@ TBD
 
 
 ## Known bugs and limitations
-1. Nomad can't understand when app container has been deployed succefully, CI/CD always shows last step as failed 
-2. Hourly weather may show wrong hour.
+1. Hourly weather may show the wrong hour, will be fixed in next releases.
+2. It is small possibility that bot sends auto message twice, default check interval 58 seconds.
 
 
 ## License
