@@ -332,6 +332,17 @@ def auto_send(message):
     bot.register_next_step_handler(message, get_switch)
 
 
+@bot.message_handler(commands=["help"])
+def help(message):
+    """
+    function for showing help
+    """
+    bot.send_message(
+        message.chat.id,
+        "Before activating auto notification send to bot at least one city name\n/status - Show details about planned notification\n/auto - Activate auto notification configuration dialogue\n",
+    )
+
+
 def get_switch(message):
     """Function for reciveing meassage, for enabling auto_send"""
     message_str = message.text
@@ -368,13 +379,7 @@ def get_weather(message):
     """
     func for get weather and sending it to user
     """
-    if re.match("help|Help", str(message.text)):
-        bot.reply_to(
-            message,
-            "/status - show details about planned notification\n/auto - activate auto notification configuration dialogue\n",
-        )
-
-    elif re.match(
+    if re.match(
         "Glory to Ukraine|Slava Ukraine|glory to ukraine|slava ukraine|Слава Украине|слава украине|Слава Україні|cлава україні|слава Україні",
         str(message.text),
     ):
