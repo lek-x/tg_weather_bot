@@ -32,10 +32,10 @@ job "wtbot-${job_env}" {
       mode     = "delay"
     }
     update {
-        max_parallel = 1
+        max_parallel = 2
         min_healthy_time = "5s"
         healthy_deadline = "3m"
-        auto_revert = false
+        auto_revert = true
         canary = 0
     }
 
