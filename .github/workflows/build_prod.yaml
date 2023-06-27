@@ -75,9 +75,6 @@ jobs:
       - name: Terraform Init
         id: init
         run: terraform init
-        env:
-          https_proxy: '164.92.180.74:3128'
-          http_proxy: '164.92.180.74:3128'
 
       - name: Terraform Validate
         id: validate
