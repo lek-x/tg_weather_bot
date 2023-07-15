@@ -360,7 +360,7 @@ def get_switch(message):
             enablesending(switch_status, time, city, message.chat.id)
             bot.send_message(
                 message.chat.id,
-                f"Auto send is enabled: {switch_status},\n time: {time}, \n city: {city}",
+                f"Auto send is enabled: yes\ntime: {time}\ncity: {city}",
             )
         elif switch_status == "no":
             switch_status = "False"
@@ -369,7 +369,7 @@ def get_switch(message):
             enablesending(switch_status, time, city, message.chat.id)
             bot.send_message(
                 message.chat.id,
-                f"Auto send is enabled: {switch_status},\n time: {time}, \n city: {city}",
+                f"Auto send is enabled: no\ntime: {time}\ncity: {city}",
             )
     else:
         bot.send_message(message.chat.id, "Sorry didn't get you")
