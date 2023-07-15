@@ -382,7 +382,7 @@ def get_weather(message):
     """
     if re.match(
         "glory to ukraine|slava ukraine|слава украине|cлава україні",
-        str(message.text).lower,
+        str(message.text).lower(),
     ):
         bot.reply_to(
             message,

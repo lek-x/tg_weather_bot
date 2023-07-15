@@ -11,10 +11,6 @@ on:
           - dev
           - prod
 
-  pull_request:
-    branches:
-      - main
-
 env:
   path_bot: bot_code
   image_name: tgwbot
