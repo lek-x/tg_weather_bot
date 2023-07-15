@@ -39,7 +39,7 @@ bot = telebot.TeleBot(token)
 
 ## vars
 timezone = pytz.timezone("Europe/Istanbul")
-DBCHECK_INTERVAL = 50
+DBCHECK_INTERVAL = 58
 
 emoji = {
     "0": "Clear \u2600\ufe0f",
@@ -78,6 +78,20 @@ emoji = {
 logger = telebot.logger
 telebot.logger.setLevel(logging.INFO)
 
+
+conn = psycopg2.connect(params)
+cur = conn.cursor()
+
+while True:
+    try:
+        cur.execute("SELECT * FROM information_schema.tables limit 1")
+        testcont = cur.fetchone()
+        if testcont[1] == "pg_catalog" or testcont[1] == "public":
+            break
+    except Exception as er:
+        print(er)
+
+
 ### Start Initial Block ###
 def create_table():
     """Creating 3 tables if they are not exist"""
@@ -106,15 +120,17 @@ def create_table():
         cur = conn.cursor()
         for command in commands:
             cur.execute(command)
-            conn.commit()
 
     except (Exception, psycopg2.DatabaseError) as error:
         print(error, error.pgerror, error.diag.message_detail)
 
     finally:
         if conn is not None:
+            conn.commit()
             conn.close()
 
+
+create_table()
 
 ### END Initial Block ###
 
@@ -266,7 +282,7 @@ def start(message):
     """
     bot.send_message(
         message.chat.id,
-        "Hello! \nI can show you the weather today in any city and send planned notification.\nPlease send me the name of the city.\nSend 'help' for showing commands",
+        "Hello! \nI can show you the weather today in any city and send planned notification.\nPlease send me the name of the city.\nBefore configuring autosend function send my any city name to remember you\nSend 'help' for showing commands",
     )
 
 
@@ -291,7 +307,7 @@ def status(message):
     finally:
         if conn is not None:
             conn.close()
-    send_enabled = "Enabled" if user_status[1] == True else "Disabled"
+    send_enabled = "Enabled" if user_status[1] is True else "Disabled"
     usr_id = user_status[2]
     set_time = user_status[3].strftime("%H:%M")
     set_city = user_status[4]
@@ -314,6 +330,17 @@ def auto_send(message):
     )
 
     bot.register_next_step_handler(message, get_switch)
+
+
+@bot.message_handler(commands=["help"])
+def help(message):
+    """
+    function for showing help
+    """
+    bot.send_message(
+        message.chat.id,
+        "Before activating auto notification send to bot at least one city name\n/status - Show details about planned notification\n/auto - Activate auto notification configuration dialogue\n",
+    )
 
 
 def get_switch(message):
@@ -352,11 +379,14 @@ def get_weather(message):
     """
     func for get weather and sending it to user
     """
-    if re.match("help|Help",str(message.text)):
-        bot.reply_to(message,"/status - show details about planned notification\n/auto - activate auto notification configuration dialogue\n")
-
-    elif re.match("Glory to Ukraine|Slava Ukraine|glory to ukraine|slava ukraine|Слава Украине|слава украине",str(message.text)):
-        bot.reply_to(message,"Героям Слава!\U0001f1fa\U0001f1e6\nGlory to the Heroes!\U0001f1fa\U0001f1e6")
+    if re.match(
+        "Glory to Ukraine|Slava Ukraine|glory to ukraine|slava ukraine|Слава Украине|слава украине|Слава Україні|cлава україні|слава Україні",
+        str(message.text),
+    ):
+        bot.reply_to(
+            message,
+            "Героям Слава!\U0001f1fa\U0001f1e6\nGlory to the Heroes!\U0001f1fa\U0001f1e6",
+        )
 
     else:
         ### Emoji block for weather status
@@ -441,8 +471,6 @@ def get_weather(message):
         except Exception:
             bot.send_message(message.chat.id, "I can't find this city. Try again.")
 
-
-create_table()
 
 Thread(target=schedule_checker).start()
 # bot.polling(non_stop=True, interval=0)

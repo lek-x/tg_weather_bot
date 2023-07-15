@@ -9,12 +9,13 @@ on:
         required: true
         default: 'prod'
         options:
-          - dev
           - prod
 
   pull_request:
     branches:
       - main
+    types:
+      - closed
 
 env:
   path_bot: bot_code
@@ -74,9 +75,6 @@ jobs:
       - name: Terraform Init
         id: init
         run: terraform init
-        env:
-          https_proxy: '164.92.180.74:3128'
-          http_proxy: '164.92.180.74:3128'
 
       - name: Terraform Validate
         id: validate

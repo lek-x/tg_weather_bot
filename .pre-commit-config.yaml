@@ -25,6 +25,8 @@ repos:
         name: pylint
         entry: pylint
         language: system
+        args:
+          - --fail-under=7
         types:
           - python
   - repo: 'https://github.com/gruntwork-io/pre-commit'
