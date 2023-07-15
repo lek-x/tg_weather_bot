@@ -326,7 +326,7 @@ def auto_send(message):
     """
     bot.send_message(
         message.chat.id,
-        "Please send text in format for auto notification. \nFor enabling: 'yes 08:00 Paris' \nFor disabling: 'no' ",
+        "Please send text in format for auto notification. \nFor enabling: 'yes/08:00/Paris' \nFor disabling: 'no' ",
     )
 
     bot.register_next_step_handler(message, get_switch)
@@ -346,7 +346,8 @@ def help(message):
 def get_switch(message):
     """Function for reciveing meassage, for enabling auto_send"""
     message_str = message.text
-    check_string = re.search("yes|no|Yes|No", message_str)
+    message_str = message_str.lower()
+    check_string = re.search("yes|no", message_str)
     if check_string is not None:
         switch_status = message_str[0:3]
         switch_status = switch_status.lower()
@@ -355,7 +356,7 @@ def get_switch(message):
         if switch_status == "yes":
             switch_status = "True"
             time = str(message_str[4:9])
-            city = str(message_str[10:])
+            city = str(message_str[10:]).title()
             enablesending(switch_status, time, city, message.chat.id)
             bot.send_message(
                 message.chat.id,
