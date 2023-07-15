@@ -314,7 +314,7 @@ def status(message):
 
     bot.send_message(
         message.chat.id,
-        f"Auto send status:\nStatus:{send_enabled},\ntime: {set_time},\
+        f"Auto send status:\nStatus:{send_enabled}\ntime: {set_time}\
         \ncity: {set_city} \nchat_id: {usr_id}",
     )
 
@@ -326,7 +326,7 @@ def auto_send(message):
     """
     bot.send_message(
         message.chat.id,
-        "Please send text in format for auto notification. \nFor enabling: 'yes/08:00/Paris' \nFor disabling: 'no' ",
+        "Please send text in format for auto notification. \nFor enabling: 'yes/08:00/Paris' \nFor disabling send: 'no' ",
     )
 
     bot.register_next_step_handler(message, get_switch)
