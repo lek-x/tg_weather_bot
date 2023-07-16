@@ -314,7 +314,7 @@ def status(message):
 
     bot.send_message(
         message.chat.id,
-        f"Auto send status:\nStatus:{send_enabled},\ntime: {set_time},\
+        f"Auto send status:\nStatus:{send_enabled}\ntime: {set_time}\
         \ncity: {set_city} \nchat_id: {usr_id}",
     )
 
@@ -326,7 +326,7 @@ def auto_send(message):
     """
     bot.send_message(
         message.chat.id,
-        "Please send text in format for auto notification. \nFor enabling: 'yes 08:00 Paris' \nFor disabling: 'no' ",
+        "Please send text in format for auto notification. \nFor enabling: 'yes/08:00/Paris' \nFor disabling send: 'no' ",
     )
 
     bot.register_next_step_handler(message, get_switch)
@@ -346,7 +346,9 @@ def help(message):
 def get_switch(message):
     """Function for reciveing meassage, for enabling auto_send"""
     message_str = message.text
-    check_string = re.search("yes|no|Yes|No", message_str)
+    message_str = message_str.lower()
+    check_string = re.search("yes|no", message_str)
+    check_time = re.search("/", message_str[4:9])
     if check_string is not None:
         switch_status = message_str[0:3]
         switch_status = switch_status.lower()
@@ -354,13 +356,19 @@ def get_switch(message):
         switch_status = str(switch_status[0])
         if switch_status == "yes":
             switch_status = "True"
-            time = str(message_str[4:9])
-            city = str(message_str[10:])
-            enablesending(switch_status, time, city, message.chat.id)
-            bot.send_message(
-                message.chat.id,
-                f"Auto send is enabled: {switch_status},\n time: {time}, \n city: {city}",
-            )
+            if check_time is not None:
+                bot.send_message(
+                    message.chat.id,
+                    f"Wrong time format, use  format XX:YY (e.g. 08:15)",
+                )
+            else:
+                time = str(message_str[4:9])
+                city = str(message_str[10:]).title()
+                enablesending(switch_status, time, city, message.chat.id)
+                bot.send_message(
+                    message.chat.id,
+                    f"Auto send is enabled: yes\ntime: {time}\ncity: {city}",
+                )
         elif switch_status == "no":
             switch_status = "False"
             time = "00:00"
@@ -368,7 +376,7 @@ def get_switch(message):
             enablesending(switch_status, time, city, message.chat.id)
             bot.send_message(
                 message.chat.id,
-                f"Auto send is enabled: {switch_status},\n time: {time}, \n city: {city}",
+                f"Auto send is enabled: no\ntime: {time}\ncity: {city}",
             )
     else:
         bot.send_message(message.chat.id, "Sorry didn't get you")
@@ -380,8 +388,8 @@ def get_weather(message):
     func for get weather and sending it to user
     """
     if re.match(
-        "Glory to Ukraine|Slava Ukraine|glory to ukraine|slava ukraine|Слава Украине|слава украине|Слава Україні|cлава україні|слава Україні",
-        str(message.text),
+        "glory to ukraine|slava ukraine|слава украине|cлава україні",
+        str(message.text).lower(),
     ):
         bot.reply_to(
             message,

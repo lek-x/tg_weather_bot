@@ -42,7 +42,7 @@ jobs:
     needs: [Checkout_repos]
     runs-on:
      - self-hosted
-    environment: ${{ inputs.job_environment }} 
+    environment: ${{ inputs.job_environment }}
     steps:
       - name: Cleanup Docker elements
         run: docker system prune -a --volumes --force
@@ -77,9 +77,6 @@ jobs:
       - name: Terraform Init
         id: init
         run: terraform init
-        env:
-          https_proxy: '164.92.180.74:3128'
-          http_proxy: '164.92.180.74:3128'
 
       - name: Terraform Validate
         id: validate
