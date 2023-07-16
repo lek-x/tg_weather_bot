@@ -348,6 +348,7 @@ def get_switch(message):
     message_str = message.text
     message_str = message_str.lower()
     check_string = re.search("yes|no", message_str)
+    check_time = re.search("/", message_str[4:9])
     if check_string is not None:
         switch_status = message_str[0:3]
         switch_status = switch_status.lower()
@@ -355,13 +356,19 @@ def get_switch(message):
         switch_status = str(switch_status[0])
         if switch_status == "yes":
             switch_status = "True"
-            time = str(message_str[4:9])
-            city = str(message_str[10:]).title()
-            enablesending(switch_status, time, city, message.chat.id)
-            bot.send_message(
-                message.chat.id,
-                f"Auto send is enabled: yes\ntime: {time}\ncity: {city}",
-            )
+            if check_time is not None:
+                bot.send_message(
+                    message.chat.id,
+                    f"Wrong time format, use  format XX:YY (e.g. 08:15)",
+                )
+            else:
+                time = str(message_str[4:9])
+                city = str(message_str[10:]).title()
+                enablesending(switch_status, time, city, message.chat.id)
+                bot.send_message(
+                    message.chat.id,
+                    f"Auto send is enabled: yes\ntime: {time}\ncity: {city}",
+                )
         elif switch_status == "no":
             switch_status = "False"
             time = "00:00"
