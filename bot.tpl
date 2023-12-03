@@ -6,7 +6,7 @@ job "wtbot-${job_env}" {
     max_parallel = 1
   }
   vault {
-    policies = ["nomad"]
+    policies = ["nomad-server"]
     change_mode   = "signal"
     change_signal = "SIGUSR1"
   }
