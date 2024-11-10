@@ -133,7 +133,7 @@ jobs:
           TF_VAR_POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
           TF_VAR_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
 
-  Run_compose:
+  Compose_UP:
     needs: [Render_template]
     runs-on: self-hosted
     environment: ${{ inputs.job_environment }}

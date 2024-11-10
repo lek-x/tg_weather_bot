@@ -3,7 +3,7 @@
 services:
   bot:
     image: ghcr.io/lek-x/${image_name}:${ver}
-    container_name: "bot${JOB_ENV}"
+    container_name: "bot-${JOB_ENV}"
     hostname: "bot-${JOB_ENV}"
     environment:
         BOT_TOKEN: "${BOT_TOKEN}"
