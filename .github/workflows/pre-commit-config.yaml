@@ -5,12 +5,14 @@ run-name: "Code validation [attempt: #${{ github.run_attempt }}]"
 # yamllint disable-line rule:truthy
 on:
   # yamllint disable-line rule:empty-values
-  push:
-    branches:
-      - '**'
-      - '!master'
-      - '!main'
-      - '!refs/pull/*'
+  # push:
+  #   branches:
+  #     - '**'
+  #     - '!master'
+  #     - '!main'
+  #     - '!refs/pull/*'
+  workflow_dispatch:
+
 env:
   VIRTUAL_ENV_DISABLE_PROMPT: 1
 
