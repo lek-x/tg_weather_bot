@@ -31,7 +31,7 @@ jobs:
     steps:
       - name: Clean old Docker images
         run: docker system prune -a -f
-        if: "{{ inputs.clean_docker_images == true}}"
+        if: "${{ inputs.clean_docker_images == true }}"
 
       - name: Checkout current repo
         uses: actions/checkout@v3
