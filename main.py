@@ -17,11 +17,11 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 import pytz
 
 ### Start Credentials block ###
-pdbn = os.environ.get("PDB")
+pdbn = os.environ.get("POSTGRES_DB")
 user = os.environ.get("POSTGRES_USER")
-password = os.environ.get("PPWD")
+password = os.environ.get("POSTGRES_PASSWORD")
 host = os.environ.get("POSTGRES_HOST")
-port = os.environ.get("PGPORT")
+port = os.environ.get("POSTGRES_PORT")
 params = (
     "dbname="
     + pdbn
@@ -34,7 +34,7 @@ params = (
     + " port="
     + port
 )
-token = os.environ.get("bottoken")
+token = os.environ.get("BOT_TOKEN")
 bot = telebot.TeleBot(token)
 
 ## vars

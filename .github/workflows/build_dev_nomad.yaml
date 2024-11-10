@@ -1,5 +1,5 @@
 ---
-name: Deploy_prod
+name: "Deploy_dev[Nomad]"
 on:
   workflow_dispatch:
     inputs:
@@ -7,23 +7,18 @@ on:
         type: choice
         description: 'Job environment prod or dev'
         required: true
-        default: 'prod'
+        default: 'dev'
         options:
+          - dev
           - prod
-
-  pull_request:
-    branches:
-      - main
-    types:
-      - closed
 
 env:
   path_bot: bot_code
   path_nomad: nomad_code
-  image_name: tgbot
+  image_name: tgwbot
   repo: ghcr.io
-  dbport: 5432
-  job_environment: prod
+  dbport: 5433
+  job_environment: dev
 
 
 jobs:
@@ -31,16 +26,20 @@ jobs:
     runs-on:
       - self-hosted
     steps:
+      - name: Clean env
+        run: rm -rf *
+
       - name: Clean old Docker images
         run: docker system prune -a -f
 
       - name: Checkout current repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3.3.0
 
   Build_docker_image:
     needs: [Checkout_repos]
     runs-on:
      - self-hosted
+    environment: ${{ inputs.job_environment }}
     steps:
       - name: Cleanup Docker elements
         run: docker system prune -a --volumes --force

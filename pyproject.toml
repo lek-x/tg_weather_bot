@@ -9,6 +9,13 @@ packages = [{include = "bot_cicd"}]
 [tool.poetry.dependencies]
 python = "^3.10"
 pre-commit = "^2.20.0"
+pylint = "2.9.3"
+commitizen = "^3.30.1"
+astroid = "2.6.2"
+pytelegrambotapi = "4.7.1"
+pytz = "2022.1"
+psycopg2 = "2.9.5"
+apscheduler = "3.10.0"
 
 
 [build-system]
