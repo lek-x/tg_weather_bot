@@ -46,7 +46,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: ghcr.io/${{ REPO }}/${{ secrets.IMAGE_NAME }}:${{ github.run_number }}
+          tags: ghcr.io/${{ secrets.REPO }}/${{ secrets.IMAGE_NAME }}:${{ github.run_number }}
           secrets: |
             GIT_AUTH_TOKEN=${{ secrets.DOCKER_PASSWORD }}
 
