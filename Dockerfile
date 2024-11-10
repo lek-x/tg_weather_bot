@@ -15,8 +15,7 @@ RUN chmod +x /app/entrypoint.sh \
     && pip install --upgrade pip setuptools \
     && pip install -r /requirements.txt \
     && pip cache purge
-ENV bottoken=$bottoken
-ENV weathertok=$weathertok
+ENV BOT_TOKEN=$BOT_TOKEN
 ENV POSTGRES_PASSWORD=$POSTGRES_PASSWORD
 ENV POSTGRES_USER=$POSTGRES_USER
 ENV POSTGRES_DB=$POSTGRES_DB

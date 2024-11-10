@@ -1,0 +1,5 @@
+env_file
+terraform*
+.venv/
+.terraform
+.terraform.lock.hcl

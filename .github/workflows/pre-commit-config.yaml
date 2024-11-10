@@ -1,0 +1,62 @@
+---
+name: Pre-commit
+run-name: "Code validation [attempt: #${{ github.run_attempt }}]"
+
+# yamllint disable-line rule:truthy
+on:
+  # yamllint disable-line rule:empty-values
+  # push:
+  #   branches:
+  #     - '**'
+  #     - '!master'
+  #     - '!main'
+  #     - '!refs/pull/*'
+  workflow_dispatch:
+
+env:
+  VIRTUAL_ENV_DISABLE_PROMPT: 1
+
+jobs:
+  pre-commit:
+    runs-on: self-hosted
+    container:
+      image: ghcr.io/lek-x/ubuntu_lint:v5
+      credentials:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+      env:
+        registry-username: ${{ secrets.DOCKER_USERNAME }}
+        registry-password: ${{ secrets.DOCKER_PASSWORD }}
+    steps:
+
+      # - name: Setup Python
+      #   uses: actions/setup-python@v4.7.0
+      #   with:
+      #     python-version: '3.10'
+      #     cache: 'poetry'
+
+      - name: Checkout current repo
+        uses: actions/checkout@v4.1.7
+
+      - name: Set current repo as safe
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Setup a local virtual environment (if no poetry.toml file)
+        run: |
+          poetry config virtualenvs.create true --local
+          poetry config virtualenvs.in-project true --local
+
+      - uses: actions/cache@v3
+        name: Define a cache for the virtual environment based on the dependencies lock file
+        with:
+          path: ./.venv
+          key: venv-${{ hashFiles('poetry.lock') }}
+
+      - name: Install the project dependencies
+        run: poetry install --no-root
+
+      - name: Run pre-commit
+        run: poetry run pre-commit run --all-files
+
+      - uses: pre-commit-ci/lite-action@v1.0.2
+        if: always()
