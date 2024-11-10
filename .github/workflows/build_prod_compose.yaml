@@ -62,7 +62,7 @@ jobs:
         with:
           push: true
           tags: ghcr.io/${{ secrets.REPO }}/${{ vars.IMAGE_NAME }}:${{ github.run_number }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
 
 
   Render_template:
