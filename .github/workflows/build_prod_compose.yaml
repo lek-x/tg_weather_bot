@@ -41,6 +41,9 @@ jobs:
     runs-on:
      - self-hosted
     steps:
+      - name: Debug
+        run:|
+          echo "${{ vars.IMAGE_NAME }}"
 
       - name: Build Docker image
         uses: mr-smithers-excellent/docker-build-push@v5
