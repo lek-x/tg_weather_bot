@@ -45,7 +45,7 @@ jobs:
       - name: Build Docker image
         uses: mr-smithers-excellent/docker-build-push@v5.8
         with:
-          image: ${{env.image_name}}
+          image: ${{ vars.IMAGE_NAME }}
           tags: $GITHUB_RUN_NUMBER
           registry: ghcr.io
           dockerfile: Dockerfile
