@@ -63,6 +63,9 @@ jobs:
           push: true
           tags: ghcr.io/${{ secrets.REPO }}/${{ vars.IMAGE_NAME }}:${{ github.run_number }}
           platforms: linux/amd64
+      
+      - name: Cleanup TMP image
+        run: rm -f /tmp/${{ vars.IMAGE_NAME }}_${{ github.run_number }}.tar
 
 
   Render_template:
@@ -136,9 +139,11 @@ jobs:
     environment: ${{ inputs.job_environment }}
 
     steps:
+      - name: Ensure Runner can login to the Registry
+        run: docker login ghcr.io -u ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }}
+
       - name: Validate docker compose file
         run: 'docker compose -f docker_compose_weather_bot_${{ inputs.job_environment }}.yml config --quiet  && printf "Composer files is OK\n" || printf "Compose faile with ERROR\n"'
 
-      - name: Nomad_run
-        id: nomad_run
+      - name: Run Docker compose
         run: 'docker compose -f docker_compose_weather_bot_${{ inputs.job_environment }}.yml up -d'
