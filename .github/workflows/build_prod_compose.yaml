@@ -46,9 +46,9 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: ghcr.io/lek-x/${{ secrets.IMAGE_NAME }}:${{ github.run_number }}
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          tags: ghcr.io/${{ REPO }}/${{ secrets.IMAGE_NAME }}:${{ github.run_number }}
+          secrets: |
+            GIT_AUTH_TOKEN=${{ secrets.DOCKER_PASSWORD }}
 
       - name: Check image by Anchore
         run: |
