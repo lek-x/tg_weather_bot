@@ -25,9 +25,7 @@ on:
 
 jobs:
   Checkout_repos:
-    runs-on:
-      - self-hosted
-    environment: ${{ inputs.job_environment }}
+    runs-on: self-hosted
     steps:
       - name: Clean old Docker images
         run: docker system prune -a -f
@@ -38,8 +36,8 @@ jobs:
 
   Build_docker_image:
     needs: [Checkout_repos]
-    runs-on:
-     - self-hosted
+    runs-on: self-hosted
+    environment: ${{ inputs.job_environment }}
     steps:
 
       - name: Build and push
@@ -56,8 +54,9 @@ jobs:
 
   Render_template:
     needs: [Build_docker_image]
-    runs-on:
-     - self-hosted
+    runs-on: self-hosted
+    environment: ${{ inputs.job_environment }}
+
     steps:
       - name: Terraform fmt
         id: fmt
@@ -120,8 +119,9 @@ jobs:
 
   Run_compose:
     needs: [Render_template]
-    runs-on:
-     - self-hosted
+    runs-on: self-hosted
+    environment: ${{ inputs.job_environment }}
+
     steps:
       - name: Validate docker compose file
         run: 'docker compose -f docker_compose_weather_bot_${{ inputs.job_environment }}.yml config --quiet  && printf "Composer files is OK\n" || printf "Compose faile with ERROR\n"'
