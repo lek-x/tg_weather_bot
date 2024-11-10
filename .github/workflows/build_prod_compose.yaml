@@ -51,7 +51,7 @@ jobs:
         with:
           load: true
           tags: ghcr.io/${{ secrets.REPO }}/${{ vars.IMAGE_NAME }}:${{ github.run_number }}
-          outputs: type=docker,dest="/tmp/${{ vars.IMAGE_NAME }}_${{ github.run_number }}.tar"
+          outputs: type=docker,dest=/tmp/${{ vars.IMAGE_NAME }}_${{ github.run_number }}.tar
 
       - name: Check image by Grype Anchore
         run: |
