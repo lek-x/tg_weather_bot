@@ -53,7 +53,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          registry: ${{ vars.REPO }}
+          registry: ghcr.io/${{ vars.REPO }}
 
       - name: Check image by Grype Anchore
         run: |
