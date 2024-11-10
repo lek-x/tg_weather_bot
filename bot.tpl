@@ -6,7 +6,7 @@ job "wtbot-${job_env}" {
     max_parallel = 1
   }
   vault {
-    policies = ["nomad"]
+    policies = ["nomad-server"]
     change_mode   = "signal"
     change_signal = "SIGUSR1"
   }
@@ -90,8 +90,8 @@ job "wtbot-${job_env}" {
         }
 
       resources {
-        cpu    = 350
-        memory = 350
+        cpu    = 650
+        memory = 650
         }
       restart {
         attempts = 10
@@ -158,8 +158,8 @@ job "wtbot-${job_env}" {
 
 
       resources {
-        cpu    = 150
-        memory = 150
+        cpu    = 350
+        memory = 350
         }
       }
   }

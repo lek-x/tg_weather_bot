@@ -24,6 +24,7 @@ env:
   repo: ghcr.io
   dbport: 5432
   job_environment: prod
+  NOMAD_TOKEN: ${{ secrets.NOMAD_TOKEN }}
 
 
 jobs:
