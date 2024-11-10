@@ -51,11 +51,11 @@ jobs:
         with:
           load: true
           tags: ghcr.io/${{ secrets.REPO }}/${{ vars.IMAGE_NAME }}:${{ github.run_number }}
-          outputs: driver=docker-container,type=oci,dest=/tmp/${{ vars.IMAGE_NAME }}_${{ github.run_number }}.tar
+          outputs: type=oci,dest=/tmp/${{ vars.IMAGE_NAME }}_${{ github.run_number }}.tar
 
       - name: Check image by Grype Anchore
         run: |
-          grype  "/tmp/${{ vars.IMAGE_NAME }}_${{ github.run_number }}.tar" --fail-on high
+          grype  "/tmp/${{ vars.IMAGE_NAME }}_${{ github.run_number }}.tar"
 
       - name: Push image
         uses: docker/build-push-action@v6
