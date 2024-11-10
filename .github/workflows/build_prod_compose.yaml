@@ -41,16 +41,12 @@ jobs:
     runs-on:
      - self-hosted
     steps:
-      - name: Debug
-        run: echo "${{ vars.IMAGE_NAME }}"
-        env:
-          IMAGE_NAME : ${{ vars.IMAGE_NAME }}
 
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: ghcr.io/lek-x/${{ vars.IMAGE_NAME }}:${{ github.run_number }}
+          tags: ghcr.io/lek-x/${{ secrets.IMAGE_NAME }}:${{ github.run_number }}
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
