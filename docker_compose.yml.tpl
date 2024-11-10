@@ -2,7 +2,7 @@
 
 services:
   bot:
-    image: ${repo}/lek-x/${image_name}:${ver}
+    image: ghcr.io/lek-x/${image_name}:${ver}
     container_name: "bot${JOB_ENV}"
     hostname: "bot-${JOB_ENV}"
     environment:
