@@ -76,8 +76,22 @@ emoji = {
 ### End Credentials block ###
 
 logger = telebot.logger
-telebot.logger.setLevel(logging.INFO)
+telebot.logger.setLevel(logging.DEBUG)
 
+
+conn = psycopg2.connect(params)
+cur = conn.cursor()
+
+while True:
+    try:
+        cur.execute('SELECT * FROM information_schema.tables limit 1')
+        testcont=cur.fetchone()
+        if testcont[1] == 'pg_catalog' or testcont[1] == 'public':
+            break
+    except Exception as er:
+        print(er)
+
+    
 ### Start Initial Block ###
 def create_table():
     """Creating 3 tables if they are not exist"""
@@ -106,15 +120,16 @@ def create_table():
         cur = conn.cursor()
         for command in commands:
             cur.execute(command)
-            conn.commit()
 
     except (Exception, psycopg2.DatabaseError) as error:
         print(error, error.pgerror, error.diag.message_detail)
 
     finally:
         if conn is not None:
+            conn.commit()
             conn.close()
 
+create_table()
 
 ### END Initial Block ###
 
@@ -442,7 +457,7 @@ def get_weather(message):
             bot.send_message(message.chat.id, "I can't find this city. Try again.")
 
 
-create_table()
+
 
 Thread(target=schedule_checker).start()
 # bot.polling(non_stop=True, interval=0)
