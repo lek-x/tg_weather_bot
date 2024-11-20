@@ -11,14 +11,9 @@ on:
           - dev
           - prod
 
-  pull_request:
-    branches:
-      - main
-
 env:
   path_bot: bot_code
-  path_nomad: nomad_code
-  image_name: tgbot
+  image_name: tgwbot
   repo: ghcr.io
   job_env: dev
   ver: 0
@@ -41,8 +36,7 @@ jobs:
 
       - name: Checkout current repo
         uses: actions/checkout@v3
-        with:
-          path: ${{env.path_nomad}}
+
 
   Rendering_nomad_file:
     runs-on:
