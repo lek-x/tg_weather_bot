@@ -13,6 +13,7 @@ on:
   push:
     branches:
       - dev
+
   pull_request:
     branches:
       - main
@@ -24,28 +25,27 @@ env:
   repo: ghcr.io
   job_env: dev
   ver: 0
+  dbport: 5432
 
 jobs:
   Checkout_repos:
     runs-on:
       - self-hosted
+
     steps:
       - name: Debug env vars
         run: echo $GITHUB_RUN_NUMBER
+
       - name: Clean old Docker images
-        run: docker system prune -a -f
+        run: docker system prune -af --volumes
+
+      - name: Clean env
+        run: rm -rf *
 
       - name: Checkout current repo
         uses: actions/checkout@v3
         with:
           path: ${{env.path_nomad}}
-
-      - name: Moving data for building image
-        run: |
-          rm -rf ${{env.path_path_bot}}/.git &&
-          rm -rf ${{env.path_nomad}}/.git &&
-          mv  ${{env.path_bot}}/*  . &&
-          mv  ${{env.path_nomad}}/* .
 
   Rendering_nomad_file:
     runs-on:
@@ -57,13 +57,14 @@ jobs:
       - name: Terraform fmt
         id: fmt
         run: terraform fmt -check
-        continue-on-error: true
+
       - name: Terraform Init
         id: init
         run: terraform init
         env:
           https_proxy: '164.92.180.74:3128'
           http_proxy: '164.92.180.74:3128'
+
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
@@ -74,10 +75,11 @@ jobs:
           TF_VAR_REPO: '${{env.repo}}'
           TF_VAR_VERSION: '${{ env.ver }}'
           TF_VAR_JOB_ENV: '${{ env.job_env }}'
+          TF_VAR_DB_PORT: ${{env.dbport}}
+
       - name: Terraform Plan
         id: plan
         run: terraform plan -no-color
-        continue-on-error: true
         env:
           TF_VAR_DOCKER_USERNAME: '${{ secrets.DOCKER_USERNAME }}'
           TF_VAR_DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
@@ -85,10 +87,11 @@ jobs:
           TF_VAR_REPO: '${{env.repo}}'
           TF_VAR_VERSION: '${{ env.ver }}'
           TF_VAR_JOB_ENV: '${{ env.job_env }}'
+          TF_VAR_DB_PORT: ${{env.dbport}}
+
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve -var VERSION=$GITHUB_RUN_NUMBER
-        continue-on-error: true
         env:
           TF_VAR_DOCKER_USERNAME: '${{ secrets.DOCKER_USERNAME }}'
           TF_VAR_DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
@@ -96,6 +99,8 @@ jobs:
           TF_VAR_REPO: '${{env.repo}}'
           TF_VAR_JOB_ENV: '${{ env.job_env }}'
           TF_VAR_VERSION: '${{ env.ver }}'
+          TF_VAR_DB_PORT: ${{env.dbport}}
+
   Nomad_check:
     needs: [Rendering_nomad_file]
     runs-on:

@@ -1,5 +1,5 @@
 ---
-name: Build_image_dev
+name: Deploy_dev
 on:
   workflow_dispatch:
     inputs:
@@ -22,8 +22,13 @@ on:
 env:
   path_bot: bot_code
   path_nomad: nomad_code
-  image_name: tgbot
+  image_name: tgwbot
   repo: ghcr.io
+<<<<<<< HEAD
+=======
+  dbport: 5433
+  job_environment: dev
+>>>>>>> de4a5c4 (workflow fixes)
 
 
 jobs:
@@ -31,13 +36,14 @@ jobs:
     runs-on:
       - self-hosted
     steps:
+      - name: Clean env
+        run: rm -rf *
+
       - name: Clean old Docker images
         run: docker system prune -a -f
 
       - name: Checkout current repo
-        uses: actions/checkout@v3
-        with:
-          path: ${{env.path_nomad}}
+        uses: actions/checkout@v3.3.0
 
   Build_docker_image:
     needs: [Checkout_repos]
@@ -90,7 +96,12 @@ jobs:
           TF_VAR_IMAGE_NAME: ${{env.image_name}}
           TF_VAR_REPO: ${{env.repo}}
           TF_VAR_VERSION: $GITHUB_RUN_NUMBER
+<<<<<<< HEAD
           TF_VAR_JOB_ENV: '${{ github.event.inputs.job_environment }}'
+=======
+          TF_VAR_JOB_ENV: '${{ env.job_environment }}'
+          TF_VAR_DB_PORT: ${{env.dbport}}
+>>>>>>> de4a5c4 (workflow fixes)
 
       - name: Terraform Plan
         id: plan
@@ -102,7 +113,12 @@ jobs:
           TF_VAR_IMAGE_NAME: ${{env.image_name}}
           TF_VAR_REPO: ${{env.repo}}
           TF_VAR_VERSION: $GITHUB_RUN_NUMBER
+<<<<<<< HEAD
           TF_VAR_JOB_ENV: '${{ github.event.inputs.job_environment }}'
+=======
+          TF_VAR_JOB_ENV: '${{ env.job_environment }}'
+          TF_VAR_DB_PORT: ${{env.dbport}}
+>>>>>>> de4a5c4 (workflow fixes)
 
       - name: Terraform Apply
         id: apply
@@ -113,7 +129,7 @@ jobs:
           TF_VAR_DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           TF_VAR_IMAGE_NAME: ${{env.image_name}}
           TF_VAR_REPO: ${{env.repo}}
-          TF_VAR_JOB_ENV: '${{ github.event.inputs.job_environment }}'
+          TF_VAR_JOB_ENV: '${{ env.job_environment }}'
           TF_VAR_VERSION: $GITHUB_RUN_NUMBER
 
   Run_nomad:

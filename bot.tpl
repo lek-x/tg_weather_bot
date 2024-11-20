@@ -10,20 +10,20 @@ job "wtbot-${job_env}" {
     change_mode   = "signal"
     change_signal = "SIGUSR1"
   }
-  group "botgr" {
+  group "botgr-${job_env}" {
     network {
       port "botapp" {
 	      to = 80
 	    }
-      port "db" {
-        static = 5432
+      port "db-${job_env}" {
+        static = ${dbport}
       }
     }
 
-    volume "postgres" {
+    volume "postgres-${job_env}" {
       type      = "host"
       read_only = false
-      source    = "postgres"
+      source    = "postgres-${job_env}"
     }
     restart {
       attempts = 10
@@ -39,30 +39,34 @@ job "wtbot-${job_env}" {
         canary = 0
     }
 
-    task "db" {
+    task "db-${job_env}" {
       driver = "docker"
       volume_mount {
-        volume      = "postgres"
+        volume      = "postgres-${job_env}"
         destination = "/var/lib/postgresql/data"
         read_only   = false
+      }
+      lifecycle {
+        sidecar = true
+        hook = "prestart"
       }
       logs {
         max_files     = 2
         max_file_size = 3
       }
       config {
-        image = "postgres:15.1-alpine"
-        ports = ["db"]
+        image = "postgres:15.2-alpine"
+        ports = ["db-${job_env}"]
       }
       env {
+        POSTGRES_DB = "$${POSTGRES_DB}"
         POSTGRES_PASSWORD = "$${POSTGRES_PASSWORD}"
         POSTGRES_USER = "$${POSTGRES_USER}"
-        POSTGRES_DB = "$${POSTGRES_DB}"
-        PGUSER = "$${POSTGRES_USER}"
+        PGPORT = "$${PGPORT}"
       }
       service {
-	      name = "db"
-	      port = "db"
+	      name = "db-${job_env}"
+	      port = "db-${job_env}"
         check {
            name ="alive"
            type     = "tcp"
@@ -72,14 +76,15 @@ job "wtbot-${job_env}" {
 	    }
 
       template {
-          destination = "secrets/db.env"
+          destination = "secrets/db-${job_env}.env"
           env         = true
           change_mode = "restart"
           data        = <<EOF
             {{ with secret  "secrets/creds/nst-bot"}}
           POSTGRES_PASSWORD = {{.Data.db_pass}}
           POSTGRES_USER = {{.Data.db_user}}
-          POSTGRES_DB = {{.Data.db_name}}
+          POSTGRES_DB = {{.Data.dbname_${job_env}}}
+          PGPORT = {{.Data.POSTGRES_PORT_${job_env}}}
             {{end}}
           EOF
         }
@@ -114,10 +119,12 @@ job "wtbot-${job_env}" {
 	    env {
         bottoken = "$${bottoken}"
         weathertok = "$${weathertok}"
-        POSTGRES_PASSWORD = "$${POSTGRES_PASSWORD}"
+        PPWD = "$${PPWD}"
+        POSTGRES_PASSWORD = "$${PPWD}"
         POSTGRES_USER = "$${POSTGRES_USER}"
-        POSTGRES_DB = "$${POSTGRES_DB}"
-        PGUSER = "$${POSTGRES_USER}"
+        PDB = "$${PDB}"
+        PGPORT = "$${PGPORT}"
+        POSTGRES_HOST = "$${NOMAD_IP_db-${job_env}}"
 		  }
 
 	    service {
@@ -132,16 +139,17 @@ job "wtbot-${job_env}" {
 	    }
 
      template {
-          destination = "secrets/app.env"
+          destination = "secrets/app-${job_env}.env"
           env         = true
           change_mode = "restart"
           data        = <<EOF
             {{ with secret  "secrets/creds/nst-bot"}}
           bottoken = {{.Data.token_${job_env}}}
           weathertok = {{.Data.weathertoken}}
-          POSTGRES_PASSWORD = {{.Data.db_pass}}
+          PPWD = {{.Data.db_pass}}
           POSTGRES_USER = {{.Data.db_user}}
-          POSTGRES_DB = {{.Data.db_name}}
+          PDB = {{.Data.dbname_${job_env}}}
+          PGPORT = {{.Data.POSTGRES_PORT_${job_env}}}
             {{end}}
           EOF
         }
