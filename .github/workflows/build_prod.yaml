@@ -51,13 +51,11 @@ jobs:
       - name: Debug
         run: ls -la
 
-      - name: Build Docker image
-        uses: mr-smithers-excellent/docker-build-push@v5.8
+      - name: Build and push
+        uses: docker/build-push-action@v6
         with:
-          image: ${{env.image_name}}
-          tags: $GITHUB_RUN_NUMBER
-          registry: ghcr.io
-          dockerfile: Dockerfile
+          push: true
+          tags: ghcr.io/lek-x/${{ vars.IMAGE_NAME }}:${{ github.run_number }}
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
