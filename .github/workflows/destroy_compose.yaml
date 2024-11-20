@@ -1,0 +1,38 @@
+---
+name: "Destroy[Compose]"
+on:
+  workflow_dispatch:
+    inputs:
+      job_environment:
+        type: choice
+        description: 'Job environment prod or dev'
+        required: true
+        default: 'dev'
+        options:
+          - prod
+          - dev
+
+      clean_docker_images:
+        type: boolean
+        description: 'Clean docker Images'
+        required: false
+
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+
+jobs:
+  Compose_Down:
+    runs-on: self-hosted
+    environment: ${{ inputs.job_environment }}
+
+    steps:
+      - name: Run Docker compose
+        run: 'docker compose -f docker_compose_weather_bot_${{ inputs.job_environment }}.yml down'
+
+      - name: Clean old Docker images
+        run: docker system prune -a -f
+        if: "${{ inputs.clean_docker_images == true }}"

@@ -1,0 +1,149 @@
+---
+name: "Deploy[Compose]"
+on:
+  workflow_dispatch:
+    inputs:
+      job_environment:
+        type: choice
+        description: 'Job environment prod or dev'
+        required: true
+        default: 'dev'
+        options:
+          - prod
+          - dev
+      clean_docker_images:
+        type: boolean
+        description: 'Clean docker Images'
+        required: false
+
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+
+jobs:
+  Checkout_repos:
+    runs-on: self-hosted
+    steps:
+      - name: Clean old Docker images
+        run: docker system prune -a -f
+        if: "${{ inputs.clean_docker_images == true }}"
+
+      - name: Checkout current repo
+        uses: actions/checkout@v4
+
+  Build_docker_image:
+    needs: [Checkout_repos]
+    runs-on: self-hosted
+    environment: ${{ inputs.job_environment }}
+    steps:
+      - name: Login to Docker Repository
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ghcr.io
+
+      - name: Build image and save localy
+        uses: docker/build-push-action@v6
+        with:
+          load: true
+          tags: ghcr.io/${{ secrets.REPO }}/${{ vars.IMAGE_NAME }}:${{ github.run_number }}
+          outputs: type=oci,dest=/tmp/${{ vars.IMAGE_NAME }}_${{ github.run_number }}.tar
+
+      - name: Check image by Grype Anchore
+        run: |
+          grype  "/tmp/${{ vars.IMAGE_NAME }}_${{ github.run_number }}.tar"
+
+      - name: Push image
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: ghcr.io/${{ secrets.REPO }}/${{ vars.IMAGE_NAME }}:${{ github.run_number }}
+          platforms: linux/amd64
+
+      - name: Cleanup TMP image
+        run: rm -f /tmp/${{ vars.IMAGE_NAME }}_${{ github.run_number }}.tar
+
+
+  Render_template:
+    needs: [Build_docker_image]
+    runs-on: self-hosted
+    environment: ${{ inputs.job_environment }}
+
+    steps:
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+        env:
+          TF_VAR_IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+          TF_VAR_REPO: ${{ secrets.REPO }}
+          TF_VAR_VERSION: $GITHUB_RUN_NUMBER
+          TF_VAR_JOB_ENV: '${{ inputs.job_environment }}'
+          TF_VAR_POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+          TF_VAR_DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          TF_VAR_DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          TF_VAR_POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          TF_VAR_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          TF_VAR_POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          TF_VAR_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color
+        continue-on-error: true
+        env:
+          TF_VAR_IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+          TF_VAR_REPO: ${{ secrets.REPO }}
+          TF_VAR_VERSION: $GITHUB_RUN_NUMBER
+          TF_VAR_JOB_ENV: '${{ inputs.job_environment }}'
+          TF_VAR_POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+          TF_VAR_DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          TF_VAR_DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          TF_VAR_POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          TF_VAR_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          TF_VAR_POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          TF_VAR_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -auto-approve -var VERSION=$GITHUB_RUN_NUMBER
+        continue-on-error: true
+        env:
+          TF_VAR_IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+          TF_VAR_REPO: ${{ secrets.REPO }}
+          TF_VAR_VERSION: $GITHUB_RUN_NUMBER
+          TF_VAR_JOB_ENV: '${{ inputs.job_environment }}'
+          TF_VAR_POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+          TF_VAR_DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          TF_VAR_DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          TF_VAR_POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          TF_VAR_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          TF_VAR_POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          TF_VAR_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+
+  Compose_UP:
+    needs: [Render_template]
+    runs-on: self-hosted
+    environment: ${{ inputs.job_environment }}
+
+    steps:
+      - name: Ensure Runner can login to the Registry
+        run: docker login ghcr.io -u ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Validate docker compose file
+        run: 'docker compose -f docker_compose_weather_bot_${{ inputs.job_environment }}.yml config --quiet  && printf "Composer files is OK\n" || printf "Compose faile with ERROR\n"'
+
+      - name: Run Docker compose
+        run: 'docker compose -f docker_compose_weather_bot_${{ inputs.job_environment }}.yml up -d'

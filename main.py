@@ -17,11 +17,11 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 import pytz
 
 ### Start Credentials block ###
-pdbn = os.environ.get("PDB")
+pdbn = os.environ.get("POSTGRES_DB")
 user = os.environ.get("POSTGRES_USER")
-password = os.environ.get("PPWD")
+password = os.environ.get("POSTGRES_PASSWORD")
 host = os.environ.get("POSTGRES_HOST")
-port = os.environ.get("PGPORT")
+port = os.environ.get("POSTGRES_PORT")
 params = (
     "dbname="
     + pdbn
@@ -34,7 +34,7 @@ params = (
     + " port="
     + port
 )
-token = os.environ.get("bottoken")
+token = os.environ.get("BOT_TOKEN")
 bot = telebot.TeleBot(token)
 
 ## vars
@@ -282,7 +282,7 @@ def start(message):
     """
     bot.send_message(
         message.chat.id,
-        "Hello! \nI can show you the weather today in any city and send planned notification.\nPlease send me the name of the city.\nSend 'help' for showing commands",
+        "Hello! \nI can show you the weather today in any city and send planned notification.\nPlease send me the name of the city.\nBefore configuring autosend function send my any city name to remember you\nSend 'help' for showing commands",
     )
 
 
@@ -393,7 +393,7 @@ def get_weather(message):
     ):
         bot.reply_to(
             message,
-            "v1.02",
+            "v1.01",
         )
 
     else:
