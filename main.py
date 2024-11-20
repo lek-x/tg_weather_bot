@@ -39,7 +39,7 @@ bot = telebot.TeleBot(token)
 
 ## vars
 timezone = pytz.timezone("Europe/Istanbul")
-DBCHECK_INTERVAL = 50
+DBCHECK_INTERVAL = 58
 
 emoji = {
     "0": "Clear \u2600\ufe0f",
@@ -76,7 +76,7 @@ emoji = {
 ### End Credentials block ###
 
 logger = telebot.logger
-telebot.logger.setLevel(logging.DEBUG)
+telebot.logger.setLevel(logging.INFO)
 
 
 conn = psycopg2.connect(params)
@@ -84,14 +84,14 @@ cur = conn.cursor()
 
 while True:
     try:
-        cur.execute('SELECT * FROM information_schema.tables limit 1')
-        testcont=cur.fetchone()
-        if testcont[1] == 'pg_catalog' or testcont[1] == 'public':
+        cur.execute("SELECT * FROM information_schema.tables limit 1")
+        testcont = cur.fetchone()
+        if testcont[1] == "pg_catalog" or testcont[1] == "public":
             break
     except Exception as er:
         print(er)
 
-    
+
 ### Start Initial Block ###
 def create_table():
     """Creating 3 tables if they are not exist"""
@@ -128,6 +128,7 @@ def create_table():
         if conn is not None:
             conn.commit()
             conn.close()
+
 
 create_table()
 
@@ -306,7 +307,7 @@ def status(message):
     finally:
         if conn is not None:
             conn.close()
-    send_enabled = "Enabled" if user_status[1] == True else "Disabled"
+    send_enabled = "Enabled" if user_status[1] is True else "Disabled"
     usr_id = user_status[2]
     set_time = user_status[3].strftime("%H:%M")
     set_city = user_status[4]
@@ -367,11 +368,20 @@ def get_weather(message):
     """
     func for get weather and sending it to user
     """
-    if re.match("help|Help",str(message.text)):
-        bot.reply_to(message,"/status - show details about planned notification\n/auto - activate auto notification configuration dialogue\n")
+    if re.match("help|Help", str(message.text)):
+        bot.reply_to(
+            message,
+            "/status - show details about planned notification\n/auto - activate auto notification configuration dialogue\n",
+        )
 
-    elif re.match("Glory to Ukraine|Slava Ukraine|glory to ukraine|slava ukraine|Слава Украине|слава украине",str(message.text)):
-        bot.reply_to(message,"Героям Слава!\U0001f1fa\U0001f1e6\nGlory to the Heroes!\U0001f1fa\U0001f1e6")
+    elif re.match(
+        "Glory to Ukraine|Slava Ukraine|glory to ukraine|slava ukraine|Слава Украине|слава украине",
+        str(message.text),
+    ):
+        bot.reply_to(
+            message,
+            "Героям Слава!\U0001f1fa\U0001f1e6\nGlory to the Heroes!\U0001f1fa\U0001f1e6",
+        )
 
     else:
         ### Emoji block for weather status
@@ -455,8 +465,6 @@ def get_weather(message):
             )
         except Exception:
             bot.send_message(message.chat.id, "I can't find this city. Try again.")
-
-
 
 
 Thread(target=schedule_checker).start()

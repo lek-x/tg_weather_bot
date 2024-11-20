@@ -132,9 +132,11 @@ job "wtbot-${job_env}" {
 	      port = "botapp"
         check {
            name ="alive"
-           type     = "tcp"
-           interval = "10s"
-           timeout  = "2s"
+           type     = "script"
+           command = "/bin/bash"
+           args  = ["-c","test -f /app/main.py" ]
+           interval = "20s"
+           timeout = "7s"
         }
 	    }
 
