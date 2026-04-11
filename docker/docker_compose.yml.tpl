@@ -20,7 +20,7 @@ services:
 
 
   db-${JOB_ENV}:
-    image: postgres:15.2-alpine
+    image: postgres:18-alpine
     container_name: db-${JOB_ENV}
     hostname: db-${JOB_ENV}
     ports:
