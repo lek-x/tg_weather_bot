@@ -17,7 +17,7 @@ locals {
 
 resource "local_file" "compose" {
   content = templatefile(
-    "${path.module}/docker_compose.yml.tpl",
+    "${path.module}/docker/docker_compose.yml.tpl",
     {
       user              = var.DOCKER_USERNAME
       pass              = var.DOCKER_PASSWORD

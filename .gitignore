@@ -3,3 +3,6 @@ terraform*
 .venv/
 .terraform
 .terraform.lock.hcl
+__pycache__/
+docker/Dockerfile.lint
+.ruff_cache/

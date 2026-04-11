@@ -29,7 +29,7 @@ It is a python based app Telegram bot
   - HashiCorp Nomad
   - Github runner
   - poetry
-  - Python > 3.7
+  - Python 3.14
   - pip
 
 
@@ -82,14 +82,14 @@ A[Clean curent directory + \ndocker system prune] --> B[Checkout] --> C[Building
 
 
 ## Main files:
-1. Dockerfile - to build app
-2. main.py - app core
+1. docker/Dockerfile - to build app
+2. code/main.py - app core
 3. .github/ - CI/CD workflow
 4. bot.tpl - terraform template
-5. entrypoint.sh - entrypoint for container
+5. docker/entrypoint.sh - entrypoint for container
 6. main.tf - terraform main file
 7. .pre-commit-config.yml - config for pre-commit tool
-8. requiremenets.txt - python packages for app
+8. code/requirements.txt - python packages for app
 
 ## Quick start:
 TBD
