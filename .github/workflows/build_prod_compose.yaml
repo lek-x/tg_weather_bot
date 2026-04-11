@@ -50,6 +50,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           load: true
+          file: docker/Dockerfile
           tags: ghcr.io/${{ secrets.REPO }}/${{ vars.IMAGE_NAME }}:${{ github.run_number }}
           outputs: type=oci,dest=/tmp/${{ vars.IMAGE_NAME }}_${{ github.run_number }}.tar
 
@@ -61,6 +62,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
+          file: docker/Dockerfile
           tags: ghcr.io/${{ secrets.REPO }}/${{ vars.IMAGE_NAME }}:${{ github.run_number }}
           platforms: linux/amd64
 

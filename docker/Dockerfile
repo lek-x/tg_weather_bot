@@ -8,9 +8,10 @@ RUN apk update \
     libpq-dev \
     postgresql \
     && rm -rf /var/cache/apk/*
-COPY requirements.txt /
+COPY code/requirements.txt /
 WORKDIR /app
-COPY ["main.py","entrypoint.sh", "./"]
+COPY code/main.py /app/main.py
+COPY docker/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh \
     && pip install --upgrade pip setuptools \
     && pip install -r /requirements.txt \

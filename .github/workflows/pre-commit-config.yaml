@@ -19,14 +19,7 @@ env:
 jobs:
   pre-commit:
     runs-on: self-hosted
-    container:
-      image: ghcr.io/lek-x/ubuntu_lint:v5
-      credentials:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-      env:
-        registry-username: ${{ secrets.DOCKER_USERNAME }}
-        registry-password: ${{ secrets.DOCKER_PASSWORD }}
+    container: ghcr.io/lek-x/ubuntu_lint:v5
     steps:
 
       # - name: Setup Python

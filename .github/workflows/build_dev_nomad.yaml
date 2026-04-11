@@ -53,7 +53,7 @@ jobs:
           image: ${{env.image_name}}
           tags: $GITHUB_RUN_NUMBER
           registry: ghcr.io
-          dockerfile: Dockerfile
+          dockerfile: docker/Dockerfile
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
