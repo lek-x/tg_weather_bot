@@ -47,4 +47,4 @@ volumes:
   postgres-${JOB_ENV}:
 
 networks:
-  weatherbot-${JOB_ENV}
+  weatherbot-${JOB_ENV}:
