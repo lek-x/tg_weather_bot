@@ -5,12 +5,12 @@ run-name: "Code validation [attempt: #${{ github.run_attempt }}]"
 # yamllint disable-line rule:truthy
 on:
   # yamllint disable-line rule:empty-values
-  # push:
-  #   branches:
-  #     - '**'
-  #     - '!master'
-  #     - '!main'
-  #     - '!refs/pull/*'
+  push:
+    branches:
+      - '**'
+      - '!master'
+      - '!main'
+      - '!refs/pull/*'
   workflow_dispatch:
 
 env:
@@ -19,7 +19,7 @@ env:
 jobs:
   pre-commit:
     runs-on: self-hosted
-    container: ghcr.io/lek-x/ubuntu_lint:v5
+    container: ghcr.io/lek-x/lint:v1
     steps:
 
       # - name: Setup Python
