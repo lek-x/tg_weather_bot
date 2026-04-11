@@ -55,7 +55,7 @@ requires-dist = [
     { name = "apscheduler", specifier = "==3.10.0" },
     { name = "commitizen", specifier = ">=3.30.1,<4" },
     { name = "prek", specifier = ">=0.3.8" },
-    { name = "psycopg2", specifier = "==2.9.5" },
+    { name = "psycopg2", specifier = "==2.9.11" },
     { name = "pylint", specifier = ">=3.3,<4" },
     { name = "pytelegrambotapi", specifier = "==4.7.1" },
     { name = "pytz", specifier = "==2022.1" },
@@ -285,9 +285,12 @@ wheels = [
 
 [[package]]
 name = "psycopg2"
-version = "2.9.5"
+version = "2.9.11"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/89/d6/cd8c46417e0f7a16b4b0fc321f4ab676a59250d08fce5b64921897fb07cc/psycopg2-2.9.5.tar.gz", hash = "sha256:a5246d2e683a972e2187a8714b5c2cf8156c064629f9a9b1a873c1730d9e245a", size = 384343, upload-time = "2022-10-25T12:34:08.874Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/89/8d/9d12bc8677c24dad342ec777529bce705b3e785fa05d85122b5502b9ab55/psycopg2-2.9.11.tar.gz", hash = "sha256:964d31caf728e217c697ff77ea69c2ba0865fa41ec20bb00f0977e62fdcc52e3", size = 379598, upload-time = "2025-10-10T11:14:46.075Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/47/08/737aa39c78d705a7ce58248d00eeba0e9fc36be488f9b672b88736fbb1f7/psycopg2-2.9.11-cp314-cp314-win_amd64.whl", hash = "sha256:f10a48acba5fe6e312b891f290b4d2ca595fc9a06850fe53320beac353575578", size = 2803738, upload-time = "2025-10-10T11:10:23.196Z" },
+]
 
 [[package]]
 name = "pylint"

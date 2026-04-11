@@ -1,4 +1,4 @@
 pyTelegramBotAPI==4.7.1
 pytz==2022.1
-psycopg2==2.9.5
+psycopg2==2.9.11
 APScheduler==3.10.0
