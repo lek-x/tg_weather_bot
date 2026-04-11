@@ -13,8 +13,8 @@ services:
         POSTGRES_PORT: "${POSTGRES_PORT}"
         POSTGRES_HOST: "db-${JOB_ENV}"
         %{if JOB_ENV == "dev"}
-        WEATHER_BOT_LOG_ENABLED=true
-        WEATHER_BOT_LOG_LEVEL=DEBUG
+        WEATHER_BOT_LOG_ENABLED: true
+        WEATHER_BOT_LOG_LEVEL: DEBUG
         %{endif}
     restart: unless-stopped
     depends_on:

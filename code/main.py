@@ -110,6 +110,26 @@ def log_error(message, *args):
         logger.error(message, *args)
 
 
+def find_closest_hourly_index(hourly_times, current_weather_time):
+    """Return the closest hourly forecast index for the current weather timestamp."""
+    if not hourly_times:
+        raise IndexError("hourly time series is empty")
+
+    try:
+        return hourly_times.index(current_weather_time)
+    except ValueError:
+        pass
+
+    current_dt = datetime.fromisoformat(current_weather_time)
+    parsed_hourly_times = [
+        datetime.fromisoformat(hourly_time) for hourly_time in hourly_times
+    ]
+    return min(
+        range(len(parsed_hourly_times)),
+        key=lambda index: abs(parsed_hourly_times[index] - current_dt),
+    )
+
+
 while True:
     conn = None
     try:
@@ -512,7 +532,7 @@ def get_weather(message):
             cur_weath_e = emoji.get(str(cur_weather_emoji), "\U0001f50d\ufe0f")
             current_weather_time = data["current_weather"]["time"]
             hourly_times = data["hourly"]["time"]
-            hourly_index = hourly_times.index(current_weather_time)
+            hourly_index = find_closest_hourly_index(hourly_times, current_weather_time)
 
             # daily
             day_weather_code = str(data["daily"]["weathercode"][0])
