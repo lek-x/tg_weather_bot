@@ -23,6 +23,10 @@ jobs:
       image: ghcr.io/lek-x/lint:v4
       options: -u 1000
 
+    env:
+      HOME: /tmp
+      UV_CACHE_DIR: /tmp/uv-cache
+
     steps:
       - name: Checkout current repo
         uses: actions/checkout@v4
