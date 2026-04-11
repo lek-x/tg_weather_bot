@@ -19,7 +19,7 @@ permissions:
 jobs:
   pre-commit:
     runs-on: self-hosted
-    container: ghcr.io/lek-x/lint:v2
+    container: ghcr.io/lek-x/lint:v3
 
     steps:
       - name: Checkout current repo

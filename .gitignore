@@ -4,3 +4,4 @@ terraform*
 .terraform
 .terraform.lock.hcl
 __pycache__/
+docker/Dockerfile.lint
