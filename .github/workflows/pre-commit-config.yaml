@@ -19,8 +19,9 @@ permissions:
 jobs:
   pre-commit:
     runs-on: self-hosted
-    container: ghcr.io/lek-x/lint:v4
-    options: --user 1000
+    container:
+      image: ghcr.io/lek-x/lint:v4
+      options: -u 1000
 
     steps:
       - name: Checkout current repo
