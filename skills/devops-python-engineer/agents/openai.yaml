@@ -1,0 +1,4 @@
+interface:
+  display_name: "DevOps Python Engineer"
+  short_description: "DevOps and Python delivery help"
+  default_prompt: "Use this skill for DevOps work on Python services, including CI/CD, Docker, Terraform, deployment debugging, observability, and backend fixes."

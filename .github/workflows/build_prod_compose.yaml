@@ -77,7 +77,6 @@ jobs:
       - name: Terraform fmt
         id: fmt
         run: terraform fmt -check
-        continue-on-error: true
 
       - name: Terraform Init
         id: init
@@ -102,7 +101,6 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: terraform plan -no-color
-        continue-on-error: true
         env:
           TF_VAR_IMAGE_NAME: ${{ vars.IMAGE_NAME }}
           TF_VAR_REPO: ${{ secrets.REPO }}
@@ -119,7 +117,6 @@ jobs:
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve -var VERSION=$GITHUB_RUN_NUMBER
-        continue-on-error: true
         env:
           TF_VAR_IMAGE_NAME: ${{ vars.IMAGE_NAME }}
           TF_VAR_REPO: ${{ secrets.REPO }}
@@ -133,12 +130,24 @@ jobs:
           TF_VAR_POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
           TF_VAR_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
 
+      - name: Upload rendered compose file
+        uses: actions/upload-artifact@v4
+        with:
+          name: compose-file-${{ inputs.job_environment }}
+          path: docker_compose_weather_bot_${{ inputs.job_environment }}.yml
+
   Compose_UP:
     needs: [Render_template]
     runs-on: self-hosted
     environment: ${{ inputs.job_environment }}
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
 
     steps:
+      - name: Download rendered compose file
+        uses: actions/download-artifact@v4
+        with:
+          name: compose-file-${{ inputs.job_environment }}
+
       - name: Ensure Runner can login to the Registry
         run: docker login ghcr.io -u ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }}
 

@@ -3,3 +3,4 @@ terraform*
 .venv/
 .terraform
 .terraform.lock.hcl
+__pycache__/

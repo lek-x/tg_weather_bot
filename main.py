@@ -40,6 +40,7 @@ bot = telebot.TeleBot(token)
 ## vars
 timezone = pytz.timezone("Europe/Istanbul")
 DBCHECK_INTERVAL = 58
+HTTP_TIMEOUT = 10
 
 emoji = {
     "0": "Clear \u2600\ufe0f",
@@ -79,17 +80,23 @@ logger = telebot.logger
 telebot.logger.setLevel(logging.INFO)
 
 
-conn = psycopg2.connect(params)
-cur = conn.cursor()
-
 while True:
+    conn = None
     try:
+        conn = psycopg2.connect(params)
+        cur = conn.cursor()
         cur.execute("SELECT * FROM information_schema.tables limit 1")
         testcont = cur.fetchone()
         if testcont[1] == "pg_catalog" or testcont[1] == "public":
+            cur.close()
+            conn.close()
             break
     except Exception as er:
         print(er)
+        time.sleep(5)
+    finally:
+        if conn is not None and not conn.closed:
+            conn.close()
 
 
 ### Start Initial Block ###
@@ -146,21 +153,23 @@ def addtodb(
     mes_text,
 ):
     """Function for adding user info into DB"""
+    conn = None
+    mes_firstusname = mes_firstusname or ""
+    mes_uslastname = mes_uslastname or ""
+    mes_usnickname = mes_usnickname or ""
     try:
         conn = psycopg2.connect(params)
         cur = conn.cursor()
         cur.execute(
-            f"INSERT INTO users (user_id,user_first_name,user_last_name,nickname) \
-                VALUES ({mes_chatid},'{mes_firstusname}','{mes_uslastname}','{mes_usnickname}') \
-                on conflict (user_id) DO nothing".format(
-                int(mes_chatid), mes_firstusname, mes_uslastname, mes_usnickname
-            )
+            """INSERT INTO users (user_id, user_first_name, user_last_name, nickname)
+               VALUES (%s, %s, %s, %s)
+               ON CONFLICT (user_id) DO NOTHING""",
+            (int(mes_chatid), mes_firstusname, mes_uslastname, mes_usnickname),
         )
         cur.execute(
-            f"INSERT INTO messages (user_id,user_message_id,chat_type,date,city) \
-                VALUES ({mes_chatid},{mes_id},'{mes_chattype}','{mes_date}','{mes_text}')".format(
-                int(mes_chatid), mes_id, mes_chattype, mes_date, mes_text
-            )
+            """INSERT INTO messages (user_id, user_message_id, chat_type, date, city)
+               VALUES (%s, %s, %s, %s, %s)""",
+            (int(mes_chatid), str(mes_id), mes_chattype, mes_date, mes_text),
         )
         conn.commit()
 
@@ -183,13 +192,14 @@ def enablesending(switch, time, city, user_id):
         conn = psycopg2.connect(params)
         cur = conn.cursor()
         cur.execute(
-            f"""INSERT INTO auto_send (send_message_enabled,send_time,city,user_id) \
-                VALUES ({switch},'{time}','{city}', {user_id}) \
-                        on conflict (user_id) \
-                        DO update set send_time=excluded.send_time, city=excluded.city, \
-                        send_message_enabled=excluded.send_message_enabled""".format(
-                {switch}, {time}, {city}, {user_id}
-            )
+            """INSERT INTO auto_send (send_message_enabled, send_time, city, user_id)
+               VALUES (%s, %s, %s, %s)
+               ON CONFLICT (user_id)
+               DO UPDATE SET
+                 send_time = excluded.send_time,
+                 city = excluded.city,
+                 send_message_enabled = excluded.send_message_enabled""",
+            (switch, time, city, user_id),
         )
         conn.commit()
     except (Exception, psycopg2.DatabaseError) as error:
@@ -203,6 +213,7 @@ def enablesending(switch, time, city, user_id):
 def run_scheduled_task():
     """Function for checking DB and sending message"""
     conn = None
+    status_data = []
     try:
         conn = psycopg2.connect(params)
         cur = conn.cursor()
@@ -292,21 +303,26 @@ def status(message):
     function for checking status of auto_send
     """
     conn = None
+    user_status = None
     try:
         conn = psycopg2.connect(params)
         cur = conn.cursor()
         cur.execute(
-            f"""SELECT * FROM auto_send WHERE user_id ={message.chat.id}""".format(
-                {message.chat.id}
-            )
+            """SELECT * FROM auto_send WHERE user_id = %s""",
+            (message.chat.id,),
         )
         user_status = cur.fetchone()
-        conn.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
         if conn is not None:
             conn.close()
+    if user_status is None:
+        bot.send_message(
+            message.chat.id,
+            "Auto send is not configured yet. Use /auto to set it up.",
+        )
+        return
     send_enabled = "Enabled" if user_status[1] is True else "Disabled"
     usr_id = user_status[2]
     set_time = user_status[3].strftime("%H:%M")
@@ -345,41 +361,46 @@ def help(message):
 
 def get_switch(message):
     """Function for reciveing meassage, for enabling auto_send"""
-    message_str = message.text
-    message_str = message_str.lower()
-    check_string = re.search("yes|no", message_str)
-    check_time = re.search("/", message_str[4:9])
-    if check_string is not None:
-        switch_status = message_str[0:3]
-        switch_status = switch_status.lower()
-        switch_status = re.findall("no|yes", switch_status)
-        switch_status = str(switch_status[0])
-        if switch_status == "yes":
-            switch_status = "True"
-            if check_time is not None:
-                bot.send_message(
-                    message.chat.id,
-                    f"Wrong time format, use  format XX:YY (e.g. 08:15)",
-                )
-            else:
-                time = str(message_str[4:9])
-                city = str(message_str[10:]).title()
-                enablesending(switch_status, time, city, message.chat.id)
-                bot.send_message(
-                    message.chat.id,
-                    f"Auto send is enabled: yes\ntime: {time}\ncity: {city}",
-                )
-        elif switch_status == "no":
-            switch_status = "False"
-            time = "00:00"
-            city = "None"
-            enablesending(switch_status, time, city, message.chat.id)
+    message_str = (message.text or "").strip()
+    lower_message = message_str.lower()
+    match_enable = re.fullmatch(r"yes/([0-2]\d):([0-5]\d)/(.+)", lower_message)
+
+    if match_enable is not None:
+        hour = int(match_enable.group(1))
+        if hour > 23:
             bot.send_message(
                 message.chat.id,
-                f"Auto send is enabled: no\ntime: {time}\ncity: {city}",
+                "Wrong time format, use format XX:YY (e.g. 08:15)",
             )
-    else:
-        bot.send_message(message.chat.id, "Sorry didn't get you")
+            return
+
+        send_time = f"{match_enable.group(1)}:{match_enable.group(2)}"
+        city = message_str.split("/", 2)[2].strip().title()
+        if not city:
+            bot.send_message(message.chat.id, "City name cannot be empty.")
+            return
+
+        enablesending(True, send_time, city, message.chat.id)
+        bot.send_message(
+            message.chat.id,
+            f"Auto send is enabled: yes\ntime: {send_time}\ncity: {city}",
+        )
+        return
+
+    if lower_message == "no":
+        send_time = "00:00"
+        city = "None"
+        enablesending(False, send_time, city, message.chat.id)
+        bot.send_message(
+            message.chat.id,
+            f"Auto send is enabled: no\ntime: {send_time}\ncity: {city}",
+        )
+        return
+
+    bot.send_message(
+        message.chat.id,
+        "Use 'yes/08:15/Paris' to enable or 'no' to disable auto send.",
+    )
 
 
 @bot.message_handler(content_types=["text"])
@@ -401,17 +422,18 @@ def get_weather(message):
         try:
             ### Retrieving city information from API according user text
             req_city = requests.get(
-                f"https://geocoding-api.open-meteo.com/v1/search?name={message.text}"
+                f"https://geocoding-api.open-meteo.com/v1/search?name={message.text}",
+                timeout=HTTP_TIMEOUT,
             )
+            req_city.raise_for_status()
             data_city = req_city.json()
+            if not data_city.get("results"):
+                bot.send_message(message.chat.id, "I can't find this city. Try again.")
+                return
             latitude = data_city["results"][0]["latitude"]
             longitude = data_city["results"][0]["longitude"]
-            timezone = data_city["results"][0]["timezone"]
+            city_timezone = data_city["results"][0]["timezone"]
             country = data_city["results"][0]["country"]
-
-            ### Parsing current time from user's message
-            date = datetime.fromtimestamp(int(message.date))
-            date_hour = int(date.hour)  # get current hour
 
             ### Retrieving weather information from API according retrieved city info
             url_string = (
@@ -420,17 +442,22 @@ def get_weather(message):
                 + "&longitude="
                 + str(longitude)
                 + "&hourly=temperature_2m,apparent_temperature,weathercode,surface_pressure,relativehumidity_2m&daily=weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,windspeed_10m_max&current_weather=true&timezone="
-                + timezone
+                + city_timezone
             )
-            req = requests.get(url_string)
+            req = requests.get(url_string, timeout=HTTP_TIMEOUT)
+            req.raise_for_status()
             data = req.json()
             city = message.text
+            date = datetime.fromtimestamp(int(message.date))
 
             # Parsing Current weather  info
             cur_weather = str(data["current_weather"]["temperature"])
             cur_wind = data["current_weather"]["windspeed"]
             cur_weather_emoji = str(data["current_weather"]["weathercode"])
             cur_weath_e = emoji.get(str(cur_weather_emoji), "\U0001f50d\ufe0f")
+            current_weather_time = data["current_weather"]["time"]
+            hourly_times = data["hourly"]["time"]
+            hourly_index = hourly_times.index(current_weather_time)
 
             # daily
             day_weather_code = str(data["daily"]["weathercode"][0])
@@ -444,14 +471,14 @@ def get_weather(message):
             day_weath_e = emoji.get(str(day_weather_code), "\U0001f50d\ufe0f")
 
             # hourly wetaher
-            hourly_weather_code = str(data["hourly"]["weathercode"][date_hour])
-            hourly_weather = data["hourly"]["temperature_2m"][date_hour]
-            hourly_feels_like = data["hourly"]["apparent_temperature"][date_hour]
+            hourly_weather_code = str(data["hourly"]["weathercode"][hourly_index])
+            hourly_weather = data["hourly"]["temperature_2m"][hourly_index]
+            hourly_feels_like = data["hourly"]["apparent_temperature"][hourly_index]
             hourly_pressure = round(
-                (int(data["hourly"]["surface_pressure"][date_hour]) * 0.760061), 1
+                (int(data["hourly"]["surface_pressure"][hourly_index]) * 0.760061), 1
             )
-            hourly_humidity = data["hourly"]["relativehumidity_2m"][date_hour]
-            hourly_time = (str(data["hourly"]["time"][date_hour]))[-5:]
+            hourly_humidity = data["hourly"]["relativehumidity_2m"][hourly_index]
+            hourly_time = (str(data["hourly"]["time"][hourly_index]))[-5:]
 
             hour_weath_e = emoji.get(str(hourly_weather_code), "\U0001f50d\ufe0f")
 
@@ -476,7 +503,12 @@ def get_weather(message):
                 f"Hourly weather: {hourly_time}\nTemperature: {hourly_weather} C° {hour_weath_e}\nFeels like: {hourly_feels_like} C°\nPressure: {hourly_pressure} mm/Hg\n"
                 f"Humidity: {hourly_humidity} %",
             )
-        except Exception:
+        except requests.RequestException:
+            bot.send_message(
+                message.chat.id,
+                "Weather service is unavailable right now. Try again later.",
+            )
+        except (IndexError, KeyError, ValueError):
             bot.send_message(message.chat.id, "I can't find this city. Try again.")
 
 

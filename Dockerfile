@@ -1,4 +1,4 @@
-FROM python:3.12-rc-alpine3.18
+FROM python:3.12-alpine
 RUN apk update \
     && apk upgrade \
     && apk add --no-cache bash \
@@ -15,9 +15,4 @@ RUN chmod +x /app/entrypoint.sh \
     && pip install --upgrade pip setuptools \
     && pip install -r /requirements.txt \
     && pip cache purge
-ENV BOT_TOKEN=$BOT_TOKEN
-ENV POSTGRES_PASSWORD=$POSTGRES_PASSWORD
-ENV POSTGRES_USER=$POSTGRES_USER
-ENV POSTGRES_DB=$POSTGRES_DB
-EXPOSE 80 88 443 8443
-ENTRYPOINT ["python", "/app/main.py"]
+ENTRYPOINT ["/app/entrypoint.sh"]

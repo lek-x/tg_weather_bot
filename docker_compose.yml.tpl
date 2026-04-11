@@ -2,7 +2,7 @@
 
 services:
   bot:
-    image: ghcr.io/lek-x/${image_name}:${ver}
+    image: ghcr.io/${repo}/${image_name}:${ver}
     container_name: "bot-${JOB_ENV}"
     hostname: "bot-${JOB_ENV}"
     environment:
@@ -19,7 +19,7 @@ services:
     container_name: db-${JOB_ENV}
     hostname: db-${JOB_ENV}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     volumes:
       - postgres-${JOB_ENV}:/var/lib/postgresql/data
     environment:
