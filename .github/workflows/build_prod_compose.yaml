@@ -155,7 +155,7 @@ jobs:
         run: docker login ghcr.io -u ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Validate docker compose file
-        run: 'docker compose -f docker_compose_weather_bot_${{ inputs.job_environment }}.yml config --quiet  && printf "Composer files is OK\n" || printf "Compose faile with ERROR\n"'
+        run: 'docker compose -f /opt/weather_bot/docker_compose_weather_bot_${{ inputs.job_environment }}.yml config --quiet  && printf "Composer files is OK\n" || printf "Compose faile with ERROR\n"'
 
       - name: Run Docker compose
-        run: 'docker compose -f docker_compose_weather_bot_${{ inputs.job_environment }}.yml up -d'
+        run: 'docker compose -f /opt/weather_bot/docker_compose_weather_bot_${{ inputs.job_environment }}.yml up -d'

@@ -42,6 +42,13 @@ bot = telebot.TeleBot(token)
 timezone = pytz.timezone("Europe/Istanbul")
 DBCHECK_INTERVAL = 58
 HTTP_TIMEOUT = 10
+LOG_ENABLED = os.environ.get("WEATHER_BOT_LOG_ENABLED", "false").lower() in (
+    "1",
+    "true",
+    "yes",
+    "on",
+)
+LOG_LEVEL = os.environ.get("WEATHER_BOT_LOG_LEVEL", "INFO").upper()
 
 emoji = {
     "0": "Clear \u2600\ufe0f",
@@ -77,8 +84,30 @@ emoji = {
 
 ### End Credentials block ###
 
-logger = telebot.logger
-telebot.logger.setLevel(logging.INFO)
+logging.basicConfig(
+    level=getattr(logging, LOG_LEVEL, logging.INFO),
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
+logger = logging.getLogger("weather_bot")
+telebot.logger.setLevel(logging.INFO if LOG_ENABLED else logging.ERROR)
+
+
+def log_info(message, *args):
+    """Log informational messages only when enabled by env var."""
+    if LOG_ENABLED:
+        logger.info(message, *args)
+
+
+def log_warning(message, *args):
+    """Log warning messages only when enabled by env var."""
+    if LOG_ENABLED:
+        logger.warning(message, *args)
+
+
+def log_error(message, *args):
+    """Log error messages only when enabled by env var."""
+    if LOG_ENABLED:
+        logger.error(message, *args)
 
 
 while True:
@@ -89,11 +118,12 @@ while True:
         cur.execute("SELECT * FROM information_schema.tables limit 1")
         testcont = cur.fetchone()
         if testcont[1] == "pg_catalog" or testcont[1] == "public":
+            log_info("Database connection established")
             cur.close()
             conn.close()
             break
     except Exception as er:
-        print(er)
+        log_warning("Database is not ready yet: %s", er)
         time.sleep(5)
     finally:
         if conn is not None and not conn.closed:
@@ -130,7 +160,7 @@ def create_table():
             cur.execute(command)
 
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error, error.pgerror, error.diag.message_detail)
+        log_error("Failed to create tables: %s", error)
 
     finally:
         if conn is not None:
@@ -174,12 +204,10 @@ def addtodb(
             (int(mes_chatid), str(mes_id), mes_chattype, mes_date, mes_text),
         )
         conn.commit()
+        log_info("Saved message and user to database for chat_id=%s", mes_chatid)
 
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-        print(error.pgcode)
-        print(error.pgerror)
-        print(error.diag.message_detail)
+        log_error("Failed to save data to database: %s", error)
 
     finally:
         if conn is not None:
@@ -204,8 +232,15 @@ def enablesending(switch, time, city, user_id):
             (switch, time, city, user_id),
         )
         conn.commit()
+        log_info(
+            "Updated autosend settings for user_id=%s enabled=%s city=%s time=%s",
+            user_id,
+            switch,
+            city,
+            time,
+        )
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
+        log_error("Failed to update autosend settings: %s", error)
     finally:
         if conn is not None:
             conn.close()
@@ -225,7 +260,7 @@ def run_scheduled_task():
         )
         status_data = cur.fetchall()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
+        log_error("Failed to read scheduled tasks from database: %s", error)
     finally:
         if conn is not None:
             conn.close()
@@ -235,6 +270,9 @@ def run_scheduled_task():
         if row[1] is False:
             continue
         if row[1] is True and row[3].strftime("%H:%M") == current_time:
+            log_info(
+                "Running scheduled weather send for user_id=%s city=%s", row[2], row[4]
+            )
 
             class message:
                 """Class for generating message object"""
@@ -315,7 +353,9 @@ def status(message):
         )
         user_status = cur.fetchone()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
+        log_error(
+            "Failed to get autosend status for user_id=%s: %s", message.chat.id, error
+        )
     finally:
         if conn is not None:
             conn.close()
@@ -422,34 +462,47 @@ def get_weather(message):
     else:
         ### Emoji block for weather status
         try:
+            city_name = (message.text or "").strip()
+            log_info(
+                "Weather request received for city=%s chat_id=%s",
+                city_name,
+                message.chat.id,
+            )
+
             ### Retrieving city information from API according user text
             req_city = requests.get(
-                f"https://geocoding-api.open-meteo.com/v1/search?name={message.text}",
+                "https://geocoding-api.open-meteo.com/v1/search",
+                params={"name": city_name, "count": 1},
                 timeout=HTTP_TIMEOUT,
             )
             req_city.raise_for_status()
             data_city = req_city.json()
             if not data_city.get("results"):
+                log_warning("City not found by geocoding API: %s", city_name)
                 bot.send_message(message.chat.id, "I can't find this city. Try again.")
                 return
             latitude = data_city["results"][0]["latitude"]
             longitude = data_city["results"][0]["longitude"]
             city_timezone = data_city["results"][0]["timezone"]
             country = data_city["results"][0]["country"]
+            resolved_city = data_city["results"][0]["name"]
 
             ### Retrieving weather information from API according retrieved city info
-            url_string = (
-                "https://api.open-meteo.com/v1/forecast?latitude="
-                + str(latitude)
-                + "&longitude="
-                + str(longitude)
-                + "&hourly=temperature_2m,apparent_temperature,weathercode,surface_pressure,relativehumidity_2m&daily=weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,windspeed_10m_max&current_weather=true&timezone="
-                + city_timezone
+            req = requests.get(
+                "https://api.open-meteo.com/v1/forecast",
+                params={
+                    "latitude": latitude,
+                    "longitude": longitude,
+                    "hourly": "temperature_2m,apparent_temperature,weathercode,surface_pressure,relativehumidity_2m",
+                    "daily": "weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,windspeed_10m_max",
+                    "current_weather": "true",
+                    "timezone": city_timezone,
+                },
+                timeout=HTTP_TIMEOUT,
             )
-            req = requests.get(url_string, timeout=HTTP_TIMEOUT)
             req.raise_for_status()
             data = req.json()
-            city = message.text
+            city = resolved_city
             date = datetime.fromtimestamp(int(message.date))
 
             # Parsing Current weather  info
@@ -505,12 +558,17 @@ def get_weather(message):
                 f"Hourly weather: {hourly_time}\nTemperature: {hourly_weather} C° {hour_weath_e}\nFeels like: {hourly_feels_like} C°\nPressure: {hourly_pressure} mm/Hg\n"
                 f"Humidity: {hourly_humidity} %",
             )
+            log_info("Weather sent for city=%s chat_id=%s", city, message.chat.id)
         except requests.RequestException:
+            log_error("Weather API request failed for city=%s", message.text)
             bot.send_message(
                 message.chat.id,
                 "Weather service is unavailable right now. Try again later.",
             )
-        except IndexError, KeyError, ValueError:
+        except (IndexError, KeyError, ValueError) as error:
+            log_error(
+                "Failed to parse weather data for city=%s: %s", message.text, error
+            )
             bot.send_message(message.chat.id, "I can't find this city. Try again.")
 
 
