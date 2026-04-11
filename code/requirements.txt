@@ -1,3 +1,4 @@
+setuptools>=80,<81
 pyTelegramBotAPI==4.7.1
 pytz==2022.1
 psycopg2==2.9.11

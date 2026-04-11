@@ -12,6 +12,7 @@ classifiers = [
 dependencies = [
     "pylint>=3.3,<4",
     "commitizen>=3.30.1,<4",
+    "setuptools>=80,<81",
     "pytelegrambotapi==4.7.1",
     "pytz==2022.1",
     "psycopg2==2.9.11",
