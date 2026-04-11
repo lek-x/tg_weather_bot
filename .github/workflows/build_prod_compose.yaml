@@ -149,6 +149,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: compose-file-${{ inputs.job_environment }}
+          path: /opt/weather_bot/
 
       - name: Ensure Runner can login to the Registry
         run: docker login ghcr.io -u ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }}
