@@ -1,6 +1,7 @@
 """
 telegram weather bot by Mezentsev Roman
 """
+
 from __future__ import absolute_import
 import os
 from datetime import datetime
@@ -140,6 +141,7 @@ def create_table():
 create_table()
 
 ### END Initial Block ###
+
 
 ### Start Functions Block ###
 def addtodb(
@@ -508,7 +510,7 @@ def get_weather(message):
                 message.chat.id,
                 "Weather service is unavailable right now. Try again later.",
             )
-        except (IndexError, KeyError, ValueError):
+        except IndexError, KeyError, ValueError:
             bot.send_message(message.chat.id, "I can't find this city. Try again.")
 
 

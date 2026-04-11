@@ -29,7 +29,7 @@ It is a python based app Telegram bot
   - HashiCorp Nomad
   - Github runner
   - poetry
-  - Python > 3.7
+  - Python 3.14
   - pip
 
 
