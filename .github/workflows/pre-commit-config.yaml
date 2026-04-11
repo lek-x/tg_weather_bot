@@ -34,7 +34,7 @@ jobs:
         name: Cache uv and virtual environment
         with:
           path: |
-            /root/.cache/uv
+            /tmp/uv-cache
             ./.venv
           key: precommit-${{ runner.os }}-${{ hashFiles('uv.lock') }}
           restore-keys: |
