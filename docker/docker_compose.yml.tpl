@@ -14,7 +14,7 @@ services:
         POSTGRES_HOST: "db-${JOB_ENV}"
     restart: unless-stopped
     depends_on:
-      - gdb-${JOB_ENV}
+      - db-${JOB_ENV}
     mem_limit: 512M
     cpus: "0.5"
 
