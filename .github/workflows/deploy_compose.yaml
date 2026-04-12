@@ -56,7 +56,7 @@ jobs:
 
       - name: Check image by Grype Anchore
         run: |
-          grype  "/tmp/${{ vars.IMAGE_NAME }}_${{ github.run_number }}.tar"
+          grype "/tmp/${{ vars.IMAGE_NAME }}_${{ github.run_number }}.tar"
 
       - name: Push image
         uses: docker/build-push-action@v6
@@ -68,7 +68,6 @@ jobs:
 
       - name: Cleanup TMP image
         run: rm -f /tmp/${{ vars.IMAGE_NAME }}_${{ github.run_number }}.tar
-
 
   Render_template:
     needs: [Build_docker_image]
@@ -102,7 +101,7 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color
+        run: terraform plan -no-color -out=tfplan-${{ inputs.job_environment }}-${{ github.run_number }}.tfplan
         env:
           TF_VAR_IMAGE_NAME: ${{ vars.IMAGE_NAME }}
           TF_VAR_REPO: ${{ secrets.REPO }}
@@ -116,9 +115,10 @@ jobs:
           TF_VAR_POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
           TF_VAR_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
 
+
       - name: Terraform Apply
         id: apply
-        run: terraform apply -auto-approve -var VERSION=$GITHUB_RUN_NUMBER
+        run: terraform apply -auto-approve -var VERSION=$GITHUB_RUN_NUMBER -no-color tfplan-${{ inputs.job_environment }}-${{ github.run_number }}.tfplan
         env:
           TF_VAR_IMAGE_NAME: ${{ vars.IMAGE_NAME }}
           TF_VAR_REPO: ${{ secrets.REPO }}
@@ -138,7 +138,7 @@ jobs:
           name: compose-file-${{ inputs.job_environment }}
           path: docker_compose_weather_bot_${{ inputs.job_environment }}.yml
 
-  Compose_UP:
+  compose_up:
     needs: [Render_template]
     runs-on: self-hosted
     environment: ${{ inputs.job_environment }}
@@ -157,5 +157,5 @@ jobs:
       - name: Validate docker compose file
         run: 'docker compose -f /opt/weather_bot/docker_compose_weather_bot_${{ inputs.job_environment }}.yml config --quiet  && printf "Composer files is OK\n" || printf "Compose faile with ERROR\n"'
 
-      - name: Run Docker compose
+      - name: Docker compose UP
         run: 'docker compose -f /opt/weather_bot/docker_compose_weather_bot_${{ inputs.job_environment }}.yml up -d'

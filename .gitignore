@@ -6,3 +6,4 @@ terraform*
 __pycache__/
 docker/Dockerfile.lint
 .ruff_cache/
+code/test.py
