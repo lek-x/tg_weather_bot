@@ -76,7 +76,6 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: self-hosted
     environment: ${{ github.event_name == 'workflow_dispatch' && inputs.job_environment || 'prod' }}
-
     steps:
       - name: Terraform fmt
         id: fmt
