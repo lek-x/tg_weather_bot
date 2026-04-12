@@ -25,6 +25,7 @@ on:
 
 jobs:
   Checkout_repos:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: self-hosted
     steps:
       - name: Clean old Docker images
@@ -36,8 +37,9 @@ jobs:
 
   Build_docker_image:
     needs: [Checkout_repos]
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: self-hosted
-    environment: ${{ inputs.job_environment }}
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.job_environment || 'prod' }}
     steps:
       - name: Login to Docker Repository
         uses: docker/login-action@v3
@@ -71,9 +73,9 @@ jobs:
 
   Render_template:
     needs: [Build_docker_image]
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: self-hosted
-    environment: ${{ inputs.job_environment }}
-
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.job_environment || 'prod' }}
     steps:
       - name: Terraform fmt
         id: fmt
@@ -90,7 +92,7 @@ jobs:
           TF_VAR_IMAGE_NAME: ${{ vars.IMAGE_NAME }}
           TF_VAR_REPO: ${{ secrets.REPO }}
           TF_VAR_VERSION: $GITHUB_RUN_NUMBER
-          TF_VAR_JOB_ENV: '${{ inputs.job_environment }}'
+          TF_VAR_JOB_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.job_environment || 'prod' }}
           TF_VAR_POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
           TF_VAR_DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           TF_VAR_DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
@@ -101,12 +103,12 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color -out=tfplan-${{ inputs.job_environment }}-${{ github.run_number }}.tfplan
+        run: terraform plan -no-color -out=tfplan-${{ github.event_name == 'workflow_dispatch' && inputs.job_environment || 'prod' }}-${{ github.run_number }}.tfplan
         env:
           TF_VAR_IMAGE_NAME: ${{ vars.IMAGE_NAME }}
           TF_VAR_REPO: ${{ secrets.REPO }}
           TF_VAR_VERSION: $GITHUB_RUN_NUMBER
-          TF_VAR_JOB_ENV: '${{ inputs.job_environment }}'
+          TF_VAR_JOB_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.job_environment || 'prod' }}
           TF_VAR_POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
           TF_VAR_DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           TF_VAR_DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
@@ -114,16 +116,17 @@ jobs:
           TF_VAR_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           TF_VAR_POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
           TF_VAR_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          TF_VAR_AIR_QUALITY_TOKEN: ${{ secrets.AIR_QUALITY_TOKEN }}
 
 
       - name: Terraform Apply
         id: apply
-        run: terraform apply -auto-approve -var VERSION=$GITHUB_RUN_NUMBER -no-color tfplan-${{ inputs.job_environment }}-${{ github.run_number }}.tfplan
+        run: terraform apply -auto-approve -no-color tfplan-${{ github.event_name == 'workflow_dispatch' && inputs.job_environment || 'prod' }}-${{ github.run_number }}.tfplan
         env:
           TF_VAR_IMAGE_NAME: ${{ vars.IMAGE_NAME }}
           TF_VAR_REPO: ${{ secrets.REPO }}
           TF_VAR_VERSION: $GITHUB_RUN_NUMBER
-          TF_VAR_JOB_ENV: '${{ inputs.job_environment }}'
+          TF_VAR_JOB_ENV: ${{ github.event_name == 'workflow_dispatch' && inputs.job_environment || 'prod' }}
           TF_VAR_POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
           TF_VAR_DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           TF_VAR_DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
@@ -135,27 +138,34 @@ jobs:
       - name: Upload rendered compose file
         uses: actions/upload-artifact@v4
         with:
-          name: compose-file-${{ inputs.job_environment }}
-          path: docker_compose_weather_bot_${{ inputs.job_environment }}.yml
+          name: compose-file-${{ github.event_name == 'workflow_dispatch' && inputs.job_environment || 'prod' }}
+          path: docker_compose_weather_bot_${{ github.event_name == 'workflow_dispatch' && inputs.job_environment || 'prod' }}.yml
 
   compose_up:
     needs: [Render_template]
     runs-on: self-hosted
-    environment: ${{ inputs.job_environment }}
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.job_environment || 'prod' }}
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
 
     steps:
       - name: Download rendered compose file
         uses: actions/download-artifact@v4
         with:
-          name: compose-file-${{ inputs.job_environment }}
+          name: compose-file-${{ github.event_name == 'workflow_dispatch' && inputs.job_environment || 'prod' }}
           path: /opt/weather_bot/
 
       - name: Ensure Runner can login to the Registry
         run: docker login ghcr.io -u ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Validate docker compose file
-        run: 'docker compose -f /opt/weather_bot/docker_compose_weather_bot_${{ inputs.job_environment }}.yml config --quiet  && printf "Composer files is OK\n" || printf "Compose faile with ERROR\n"'
+        run: >-
+          docker compose -f /opt/weather_bot/docker_compose_weather_bot_${{
+          github.event_name == 'workflow_dispatch' && inputs.job_environment || 'prod'
+          }}.yml config --quiet && printf "Composer files is OK\n" || printf
+          "Compose faile with ERROR\n"
 
       - name: Docker compose UP
-        run: 'docker compose -f /opt/weather_bot/docker_compose_weather_bot_${{ inputs.job_environment }}.yml up -d'
+        run: >-
+          docker compose -f /opt/weather_bot/docker_compose_weather_bot_${{
+          github.event_name == 'workflow_dispatch' && inputs.job_environment || 'prod'
+          }}.yml up -d

@@ -47,6 +47,7 @@ dependencies = [
     { name = "pylint" },
     { name = "pytelegrambotapi" },
     { name = "pytz" },
+    { name = "requests" },
     { name = "ruff" },
     { name = "setuptools" },
 ]
@@ -60,6 +61,7 @@ requires-dist = [
     { name = "pylint", specifier = ">=3.3,<4" },
     { name = "pytelegrambotapi", specifier = "==4.7.1" },
     { name = "pytz", specifier = "==2022.1" },
+    { name = "requests", specifier = ">=2.33.1" },
     { name = "ruff", specifier = ">=0.15.10" },
     { name = "setuptools", specifier = ">=80,<81" },
 ]

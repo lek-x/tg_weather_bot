@@ -36,6 +36,7 @@ params = (
     + port
 )
 token = os.environ.get("BOT_TOKEN")
+air_quality_token = os.environ.get("AIR_QUALITY_TOKEN")
 bot = telebot.TeleBot(token)
 
 ## vars
@@ -128,6 +129,60 @@ def find_closest_hourly_index(hourly_times, current_weather_time):
         range(len(parsed_hourly_times)),
         key=lambda index: abs(parsed_hourly_times[index] - current_dt),
     )
+
+
+def air_quality(city):
+    """Function for fetching air quality data"""
+    air_quality_details = {
+        "aqi": "N/A",
+        "emoji": "",
+        "main_pollutant": "N/A",
+        "pm25": "N/A",
+        "pm10": "N/A",
+        "no2": "N/A",
+        "so2": "N/A",
+        "co": "N/A",
+    }
+    try:
+        response = requests.get(
+            f"https://api.waqi.info/feed/{city}/?token={air_quality_token}",
+            timeout=HTTP_TIMEOUT,
+        )
+        response.raise_for_status()
+        resp = response.json()
+        iaqi = resp.get("data", {}).get("iaqi", {})
+        air_quality_details.update(
+            {
+                "aqi": resp.get("data", {}).get("aqi", "N/A"),
+                "main_pollutant": resp.get("data", {}).get("dominentpol", "N/A"),
+                "pm25": iaqi.get("pm25", {}).get("v", "N/A"),
+                "pm10": iaqi.get("pm10", {}).get("v", "N/A"),
+                "no2": iaqi.get("no2", {}).get("v", "N/A"),
+                "so2": iaqi.get("so2", {}).get("v", "N/A"),
+                "co": iaqi.get("co", {}).get("v", "N/A"),
+            }
+        )
+
+        try:
+            aqi = int(air_quality_details["aqi"])
+        except TypeError, ValueError:
+            aqi = None
+
+        if aqi is not None:
+            if 0 <= aqi <= 50:
+                air_quality_details["emoji"] = " Good air quality \u2705"
+            elif 51 <= aqi <= 100:
+                air_quality_details["emoji"] = " Moderate air quality \u26a0"
+            elif 101 <= aqi <= 150:
+                air_quality_details["emoji"] = " Bad air quality \u2757"
+            elif 151 <= aqi <= 200:
+                air_quality_details["emoji"] = " Very bad air quality \u274c"
+            else:
+                air_quality_details["emoji"] = " Extremely bad air quality \U0001f6a8"
+    except Exception as e:
+        log_error("Failed to fetch air quality data for city=%s: %s", city, e)
+
+    return air_quality_details
 
 
 while True:
@@ -342,7 +397,6 @@ def schedule_checker():
 
 
 ### END Functions Block ###
-
 ### Start main BOT Block ###
 
 
@@ -476,7 +530,7 @@ def get_weather(message):
     ):
         bot.reply_to(
             message,
-            "v1.01",
+            "v2.00",
         )
 
     else:
@@ -525,7 +579,7 @@ def get_weather(message):
             city = resolved_city
             date = datetime.fromtimestamp(int(message.date))
 
-            # Parsing Current weather  info
+            # Parsing Current weather info
             cur_weather = str(data["current_weather"]["temperature"])
             cur_wind = data["current_weather"]["windspeed"]
             cur_weather_emoji = str(data["current_weather"]["weathercode"])
@@ -557,6 +611,8 @@ def get_weather(message):
 
             hour_weath_e = emoji.get(str(hourly_weather_code), "\U0001f50d\ufe0f")
 
+            air_quality_details = air_quality(city)
+
             addtodb(
                 message.chat.id,
                 message.from_user.first_name,
@@ -568,6 +624,20 @@ def get_weather(message):
                 message.text,
             )
 
+            if air_quality_details["aqi"] != "N/A":
+                air_quality_text = (
+                    f"\nAir Quality:\n"
+                    f"AQI: {air_quality_details['aqi']}{air_quality_details['emoji']}\n"
+                    f"Main Pollutant: {air_quality_details['main_pollutant']}\n"
+                    f"PM25: {air_quality_details['pm25']}\n"
+                    f"PM10: {air_quality_details['pm10']}\n"
+                    f"NO2: {air_quality_details['no2']}\n"
+                    f"SO2: {air_quality_details['so2']}\n"
+                    f"CO: {air_quality_details['co']}"
+                )
+            else:
+                air_quality_text = f"\nAir Quality data is not available for {city}"
+
             bot.send_message(
                 message.chat.id,
                 f"Current  weather in {city}/{country}\nCurrent temperature: {cur_weather} C° {cur_weath_e}\n"
@@ -576,7 +646,8 @@ def get_weather(message):
                 f"Feels like: from {day_feels_like_min} C° to {day_feels_like_max} C°,\nWind speed: {day_windspeed_max} m/s\n"
                 f"Sunrise/Sunset - {sunrise}/{sunset}\n\n"
                 f"Hourly weather: {hourly_time}\nTemperature: {hourly_weather} C° {hour_weath_e}\nFeels like: {hourly_feels_like} C°\nPressure: {hourly_pressure} mm/Hg\n"
-                f"Humidity: {hourly_humidity} %",
+                f"Humidity: {hourly_humidity}%\n"
+                f"{air_quality_text}",
             )
             log_info("Weather sent for city=%s chat_id=%s", city, message.chat.id)
         except requests.RequestException:
