@@ -9,6 +9,7 @@ variable "POSTGRES_PASSWORD" {}
 variable "POSTGRES_USER" {}
 variable "POSTGRES_DB" {}
 variable "POSTGRES_PORT" {}
+variable "AIR_QUALITY_TOKEN" {}
 
 locals {
   compose_filename = var.JOB_ENV == "prod" ? "docker_compose_weather_bot_prod.yml" : "docker_compose_weather_bot_dev.yml"
@@ -30,6 +31,7 @@ resource "local_file" "compose" {
       POSTGRES_PASSWORD = var.POSTGRES_PASSWORD
       POSTGRES_DB       = var.POSTGRES_DB
       BOT_TOKEN         = var.BOT_TOKEN
+      AIR_QUALITY_TOKEN = var.AIR_QUALITY_TOKEN
 
     }
   )

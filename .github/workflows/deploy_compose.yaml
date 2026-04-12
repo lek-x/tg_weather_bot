@@ -117,6 +117,7 @@ jobs:
           TF_VAR_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           TF_VAR_POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
           TF_VAR_BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          TF_VAR_AIR_QUALITY_TOKEN: ${{ secrets.AIR_QUALITY_TOKEN }}
 
 
       - name: Terraform Apply
