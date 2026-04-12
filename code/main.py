@@ -624,6 +624,20 @@ def get_weather(message):
                 message.text,
             )
 
+            if air_quality_details["aqi"] != "N/A":
+                air_quality_text = (
+                    f"\nAir Quality:\n"
+                    f"AQI: {air_quality_details['aqi']}{air_quality_details['emoji']}\n"
+                    f"Main Pollutant: {air_quality_details['main_pollutant']}\n"
+                    f"PM25: {air_quality_details['pm25']}\n"
+                    f"PM10: {air_quality_details['pm10']}\n"
+                    f"NO2: {air_quality_details['no2']}\n"
+                    f"SO2: {air_quality_details['so2']}\n"
+                    f"CO: {air_quality_details['co']}"
+                )
+            else:
+                air_quality_text = f"\nAir Quality data is not available for {city}"
+
             bot.send_message(
                 message.chat.id,
                 f"Current  weather in {city}/{country}\nCurrent temperature: {cur_weather} C° {cur_weath_e}\n"
@@ -633,7 +647,7 @@ def get_weather(message):
                 f"Sunrise/Sunset - {sunrise}/{sunset}\n\n"
                 f"Hourly weather: {hourly_time}\nTemperature: {hourly_weather} C° {hour_weath_e}\nFeels like: {hourly_feels_like} C°\nPressure: {hourly_pressure} mm/Hg\n"
                 f"Humidity: {hourly_humidity}%\n"
-                f"Air Quality: \nAQI={air_quality_details['aqi']}{air_quality_details['emoji']},\nMain Pollutant={air_quality_details['main_pollutant']},\nPM25={air_quality_details['pm25']},\nPM10={air_quality_details['pm10']},\nNO2={air_quality_details['no2']},\nSO2={air_quality_details['so2']},\nCO={air_quality_details['co']}",
+                f"{air_quality_text}",
             )
             log_info("Weather sent for city=%s chat_id=%s", city, message.chat.id)
         except requests.RequestException:
