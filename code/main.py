@@ -9,6 +9,7 @@ import time
 from threading import Thread
 import re
 import logging
+import random
 import telebot
 
 # from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
@@ -93,6 +94,29 @@ logger = logging.getLogger("weather_bot")
 telebot.logger.setLevel(logging.INFO if LOG_ENABLED else logging.ERROR)
 
 
+def get_int_env(name, default):
+    """Return an integer env var value or a safe default."""
+    try:
+        return int(os.environ.get(name, default))
+    except TypeError, ValueError:
+        return default
+
+
+def get_float_env(name, default):
+    """Return a float env var value or a safe default."""
+    try:
+        return float(os.environ.get(name, default))
+    except TypeError, ValueError:
+        return default
+
+
+HTTP_RETRIES = max(1, get_int_env("WEATHER_HTTP_RETRIES", 3))
+HTTP_RETRY_BASE_SLEEP = max(
+    0,
+    get_float_env("WEATHER_HTTP_RETRY_BASE_SLEEP", 2),
+)
+
+
 def log_info(message, *args):
     """Log informational messages only when enabled by env var."""
     if LOG_ENABLED:
@@ -106,9 +130,36 @@ def log_warning(message, *args):
 
 
 def log_error(message, *args):
-    """Log error messages only when enabled by env var."""
-    if LOG_ENABLED:
-        logger.error(message, *args)
+    """Log errors even when verbose bot logging is disabled."""
+    logger.error(message, *args)
+
+
+def get_with_retries(url, *, params=None, timeout=HTTP_TIMEOUT):
+    """GET request with retries for transient weather API/network failures."""
+    last_error = None
+
+    for attempt in range(1, HTTP_RETRIES + 1):
+        try:
+            response = requests.get(url, params=params, timeout=timeout)
+            if response.status_code in (429, 500, 502, 503, 504):
+                response.raise_for_status()
+            return response
+        except requests.RequestException as error:
+            last_error = error
+            if attempt == HTTP_RETRIES:
+                break
+
+            delay = HTTP_RETRY_BASE_SLEEP * attempt + random.uniform(0, 1)
+            log_warning(
+                "HTTP request failed, retrying attempt=%s/%s url=%s error=%s",
+                attempt,
+                HTTP_RETRIES,
+                url,
+                error,
+            )
+            time.sleep(delay)
+
+    raise last_error
 
 
 def find_closest_hourly_index(hourly_times, current_weather_time):
@@ -144,7 +195,7 @@ def air_quality(city):
         "co": "N/A",
     }
     try:
-        response = requests.get(
+        response = get_with_retries(
             f"https://api.waqi.info/feed/{city}/?token={air_quality_token}",
             timeout=HTTP_TIMEOUT,
         )
@@ -544,7 +595,7 @@ def get_weather(message):
             )
 
             ### Retrieving city information from API according user text
-            req_city = requests.get(
+            req_city = get_with_retries(
                 "https://geocoding-api.open-meteo.com/v1/search",
                 params={"name": city_name, "count": 1},
                 timeout=HTTP_TIMEOUT,
@@ -562,7 +613,7 @@ def get_weather(message):
             resolved_city = data_city["results"][0]["name"]
 
             ### Retrieving weather information from API according retrieved city info
-            req = requests.get(
+            req = get_with_retries(
                 "https://api.open-meteo.com/v1/forecast",
                 params={
                     "latitude": latitude,
